@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:medicare_app/pages/register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -25,10 +26,32 @@ class _LoginPageState extends State<LoginPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // Navigation handled automatically via authStateChanges
+      // Navigazione gestita automaticamente da authStateChanges
     } on FirebaseAuthException catch (e) {
+      String message;
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'No account found for that email.';
+          break;
+        case 'wrong-password':
+          message = 'Incorrect password.';
+          break;
+        case 'invalid-email':
+          message = 'Invalid email address.';
+          break;
+        case 'user-disabled':
+          message = 'This user account has been disabled.';
+          break;
+        default:
+          message = 'Login failed: ${e.message}';
+      }
+
       setState(() {
-        _errorMessage = e.message;
+        _errorMessage = message;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = "Unknown error: $e";
       });
     } finally {
       setState(() {
@@ -38,44 +61,75 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _navigateToRegister() {
-    // TODO: Navigate to your registration page
-    print('Navigate to registration screen');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RegisterPage()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // Se è in attesa della connessione allo stream
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        // Se l'utente è loggato, naviga alla home
+        if (snapshot.hasData && FirebaseAuth.instance.currentUser != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (ModalRoute.of(context)?.isCurrent == true) {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
+          });
+          return const SizedBox(); // Nessun blocco visivo temporaneo
+        }
+
+        // Se non è loggato, mostra la pagina di login
+        return Scaffold(
+          appBar: AppBar(title: const Text('Login')),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(labelText: 'Password'),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 20),
+                if (_errorMessage != null)
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                const SizedBox(height: 20),
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                      onPressed: _login,
+                      child: const Text('Login'),
+                    ),
+                TextButton(
+                  onPressed: _navigateToRegister,
+                  child: const Text("Don't have an account? Sign up"),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 20),
-            if (_errorMessage != null)
-              Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
-            const SizedBox(height: 20),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(onPressed: _login, child: const Text('Login')),
-            TextButton(
-              onPressed: _navigateToRegister,
-              child: const Text("Don't have an account? Sign up"),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

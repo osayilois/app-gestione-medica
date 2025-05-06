@@ -4,6 +4,8 @@ import 'package:medicare_app/util/category_card.dart';
 import 'package:medicare_app/util/doctor_card.dart';
 import 'package:medicare_app/pages/medical_card_page.dart';
 import 'package:medicare_app/pages/appointment_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:medicare_app/pages/login_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,7 +15,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Lista di medici con specializzazione
   List<Map<String, String>> doctors = [
     {
       'name': 'Dr. Amanda Chavez',
@@ -35,27 +36,20 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
-  // Lista dei medici filtrata
   List<Map<String, String>> filteredDoctors = [];
-
-  // Controller per la ricerca
   TextEditingController _searchController = TextEditingController();
-
-  // Specialità selezionata
   String selectedSpecialty = 'All';
 
   @override
   void initState() {
     super.initState();
-    filteredDoctors = doctors; // All'inizio mostriamo tutti i medici
+    filteredDoctors = doctors;
   }
 
-  // Funzione per filtrare i medici
   void _filterDoctors(String query) {
     List<Map<String, String>> results = [];
     if (query.isEmpty && selectedSpecialty == 'All') {
-      results =
-          doctors; // Se la query è vuota e non è stata selezionata una specialità, mostriamo tutti i medici
+      results = doctors;
     } else {
       results =
           doctors.where((doctor) {
@@ -65,22 +59,37 @@ class _HomePageState extends State<HomePage> {
             bool matchesSpecialty =
                 selectedSpecialty == 'All' ||
                 doctor['specialty'] == selectedSpecialty;
-            return matchesName &&
-                matchesSpecialty; // Filtra per nome e specialità
+            return matchesName && matchesSpecialty;
           }).toList();
     }
     setState(() {
-      filteredDoctors = results; // Aggiorna la lista filtrata
+      filteredDoctors = results;
     });
   }
 
-  // Metodo per cambiare la specialità selezionata
   void _onSpecialtyChanged(String? newSpecialty) {
     setState(() {
-      selectedSpecialty =
-          newSpecialty ?? 'All'; // Imposta la specialità selezionata
+      selectedSpecialty = newSpecialty ?? 'All';
     });
-    _filterDoctors(_searchController.text); // Rifa il filtraggio
+    _filterDoctors(_searchController.text);
+  }
+
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
+  }
+
+  String getUserDisplayName() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      user.reload(); // Forza il ricaricamento dell'utente
+      return user.displayName?.split(' ').first ?? 'User';
+    } else {
+      return 'User';
+    }
   }
 
   @override
@@ -89,13 +98,12 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: Column(
           children: [
-            //app bar
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 25.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  //name
+                  // Greeting and user email or name
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -108,7 +116,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        'Martina Castelli',
+                        getUserDisplayName(),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
@@ -117,14 +125,23 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
 
-                  //profile picture
-                  Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.deepPurple[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(Icons.person),
+                  // Profile and logout
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple[100],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(Icons.person),
+                      ),
+                      SizedBox(width: 10),
+                      IconButton(
+                        icon: Icon(Icons.logout, color: Colors.red),
+                        onPressed: _logout,
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -132,7 +149,7 @@ class _HomePageState extends State<HomePage> {
 
             SizedBox(height: 25),
 
-            //card -> how do you feel?
+            // "How do you feel?" card
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: Container(
@@ -143,7 +160,6 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: Row(
                   children: [
-                    // animation or cute picture
                     Container(
                       height: 100,
                       width: 100,
@@ -152,7 +168,6 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     SizedBox(width: 20),
-                    //how do you feel? + button
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,7 +218,7 @@ class _HomePageState extends State<HomePage> {
 
             SizedBox(height: 25),
 
-            // Barra di ricerca
+            // Search bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: Container(
@@ -214,7 +229,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: TextField(
                   controller: _searchController,
-                  onChanged: _filterDoctors, // Funzione di ricerca
+                  onChanged: _filterDoctors,
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.search),
                     border: InputBorder.none,
@@ -226,7 +241,7 @@ class _HomePageState extends State<HomePage> {
 
             SizedBox(height: 25),
 
-            // Dropdown per selezionare la specialità
+            // Specialty dropdown
             Container(
               height: 60,
               child: Padding(
@@ -251,7 +266,6 @@ class _HomePageState extends State<HomePage> {
 
             SizedBox(height: 25),
 
-            // Lista dei medici filtrata
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: Row(
@@ -267,7 +281,7 @@ class _HomePageState extends State<HomePage> {
 
             SizedBox(height: 25),
 
-            // Lista dei medici filtrata in base alla specialità e ricerca
+            // Doctor list
             Container(
               height: 250,
               child: Expanded(
