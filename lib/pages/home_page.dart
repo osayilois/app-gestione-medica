@@ -86,7 +86,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
       body: SafeArea(
         child: Column(
           children: [
@@ -228,20 +227,25 @@ class _HomePageState extends State<HomePage> {
             SizedBox(height: 25),
 
             // Dropdown per selezionare la specialità
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: DropdownButton<String>(
-                value: selectedSpecialty,
-                items:
-                    ['All', 'Therapist', 'Dentist', 'Surgeon'].map((specialty) {
-                      return DropdownMenuItem<String>(
-                        value: specialty,
-                        child: Text(specialty),
-                      );
-                    }).toList(),
-                onChanged: _onSpecialtyChanged,
-                isExpanded: true,
-                hint: Text('Select Specialty'),
+            Container(
+              height: 60,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: DropdownButton<String>(
+                  value: selectedSpecialty,
+                  items:
+                      ['All', 'Therapist', 'Dentist', 'Surgeon'].map((
+                        specialty,
+                      ) {
+                        return DropdownMenuItem<String>(
+                          value: specialty,
+                          child: Text(specialty),
+                        );
+                      }).toList(),
+                  onChanged: _onSpecialtyChanged,
+                  isExpanded: true,
+                  hint: Text('Select Specialty'),
+                ),
               ),
             ),
 
@@ -264,31 +268,34 @@ class _HomePageState extends State<HomePage> {
             SizedBox(height: 25),
 
             // Lista dei medici filtrata in base alla specialità e ricerca
-            Expanded(
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children:
-                    filteredDoctors.map((doctor) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => AppointmentPage(
-                                    doctorName: doctor['name']!,
-                                  ),
-                            ),
-                          );
-                        },
-                        child: DoctorCard(
-                          doctorImagePath: doctor['image']!,
-                          rating: doctor['rating']!,
-                          doctorName: doctor['name']!,
-                          doctorProfession: doctor['specialty']!,
-                        ),
-                      );
-                    }).toList(),
+            Container(
+              height: 250,
+              child: Expanded(
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children:
+                      filteredDoctors.map((doctor) {
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => AppointmentPage(
+                                      doctorName: doctor['name']!,
+                                    ),
+                              ),
+                            );
+                          },
+                          child: DoctorCard(
+                            doctorImagePath: doctor['image']!,
+                            rating: doctor['rating']!,
+                            doctorName: doctor['name']!,
+                            doctorProfession: doctor['specialty']!,
+                          ),
+                        );
+                      }).toList(),
+                ),
               ),
             ),
           ],
