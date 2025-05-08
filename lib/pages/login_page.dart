@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                Image.asset('lib/images/med_logo.png', height: 120),
+                Image.asset('lib/images/logonobg_medicare.png', height: 120),
                 const SizedBox(height: 30),
                 const Text(
                   'Welcome Back!',
