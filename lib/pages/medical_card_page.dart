@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MedicalCardPage extends StatefulWidget {
+  const MedicalCardPage({super.key});
+
   @override
   _MedicalCardPageState createState() => _MedicalCardPageState();
 }
@@ -29,7 +31,7 @@ class _MedicalCardPageState extends State<MedicalCardPage> {
     // Qui potresti salvare i dati localmente o su un server
     print('Name: ${_nameController.text}');
     print('Age: ${_ageController.text}');
-    print('Blood Type: ${_selectedBloodType}');
+    print('Blood Type: $_selectedBloodType');
     print('Allergies: ${_allergiesController.text}');
     print('Medical Conditions: ${_conditionsController.text}');
 

@@ -4,14 +4,14 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 class AppointmentPage extends StatefulWidget {
   final String doctorName;
 
-  AppointmentPage({required this.doctorName});
+  const AppointmentPage({super.key, required this.doctorName});
 
   @override
   _AppointmentPageState createState() => _AppointmentPageState();
 }
 
 class _AppointmentPageState extends State<AppointmentPage> {
-  List<Appointment> _appointments = [];
+  final List<Appointment> _appointments = [];
 
   void _bookAppointment(DateTime date) async {
     final pickedTime = await showTimePicker(

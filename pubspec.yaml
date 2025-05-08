@@ -38,7 +38,9 @@ dependencies:
   syncfusion_flutter_calendar: ^29.1.40
   firebase_core: ^3.13.0
   firebase_auth: ^5.5.3
+  cloud_firestore: ^5.5.3
  
+
 
 
 dev_dependencies:
@@ -94,3 +96,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  # dependencies:
+  # flutter:
+  #   sdk: flutter
+  # google_fonts: ^6.1.0

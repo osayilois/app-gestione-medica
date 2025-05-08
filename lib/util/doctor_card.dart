@@ -6,7 +6,8 @@ class DoctorCard extends StatelessWidget {
   final String doctorName;
   final String doctorProfession;
 
-  DoctorCard({
+  const DoctorCard({
+    super.key,
     required this.doctorImagePath,
     required this.rating,
     required this.doctorName,
@@ -48,7 +49,7 @@ class DoctorCard extends StatelessWidget {
             ),
 
             //doctor title
-            Text(doctorProfession + ' 25 y.e.'),
+            Text('$doctorProfession 25 y.e.'),
           ],
         ),
       ),
