@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:medicare_app/pages/home_page.dart';
 import 'package:medicare_app/pages/register_page.dart';
+import 'package:medicare_app/theme/text_styles.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -58,27 +59,94 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 20),
                 Image.asset('lib/images/logonobg_medicare.png', height: 120),
                 const SizedBox(height: 30),
-                const Text(
+                Text(
                   'Welcome Back!',
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  style: AppTextStyles.title(color: Colors.black),
                 ),
                 const SizedBox(height: 10),
-                const Text('Login to continue'),
+                Text(
+                  'Login to continue',
+                  style: AppTextStyles.subtitle(color: Colors.black),
+                ),
                 const SizedBox(height: 30),
                 TextField(
                   controller: emailController,
-                  decoration: const InputDecoration(
+                  style: AppTextStyles.body(
+                    color: Colors.black,
+                  ), // Font del testo inserito
+                  decoration: InputDecoration(
                     labelText: 'Email',
+                    labelStyle: AppTextStyles.body(color: Colors.grey[700]!),
                     prefixIcon: Icon(Icons.email),
+                    filled: true,
+                    fillColor: Colors.grey[200], // sfondo leggero
+                    // bordo quando il cambo non è selezionato
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Colors.grey.shade400,
+                        width: 1,
+                      ),
+                    ),
+
+                    // bordo quando il campo è selezionato
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Colors.deepPurple,
+                        width: 1.5,
+                      ),
+                    ),
+
+                    // bordo in stato di errore
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Colors.red,
+                        width: 1.5,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: passwordController,
+                  style: AppTextStyles.body(
+                    color: Colors.black,
+                  ), // Font del testo inserito
                   obscureText: true,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Password',
+                    labelStyle: AppTextStyles.body(color: Colors.grey[700]!),
                     prefixIcon: Icon(Icons.lock),
+                    filled: true,
+                    fillColor: Colors.grey[200], // sfondo leggero
+                    // bordo quando il campo non è selezionato
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Colors.grey.shade400,
+                        width: 1,
+                      ),
+                    ),
+
+                    // bordo quando il campo è attivo
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Colors.deepPurple,
+                        width: 1.5,
+                      ),
+                    ),
+
+                    // Bordo in stato di errore (opzionale)
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Colors.red,
+                        width: 1.5,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -94,7 +162,10 @@ class _LoginPageState extends State<LoginPage> {
                           vertical: 12,
                         ),
                       ),
-                      child: const Text('Login'),
+                      child: Text(
+                        'Login',
+                        style: AppTextStyles.buttons(color: Colors.white),
+                      ),
                     ),
                 const SizedBox(height: 20),
                 TextButton(
@@ -106,7 +177,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     );
                   },
-                  child: const Text("Don't have an account? Register here"),
+                  child: Text(
+                    "Don't have an account? Register here",
+                    style: AppTextStyles.link(color: Colors.deepPurple),
+                  ),
                 ),
               ],
             ),
