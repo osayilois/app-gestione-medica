@@ -33,12 +33,21 @@ class _LoginPageState extends State<LoginPage> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: const Text('Login Failed'),
-              content: Text(e.message ?? 'Unknown error'),
+              title: Text(
+                'Login Failed',
+                style: AppTextStyles.subtitle(color: Colors.black),
+              ),
+              content: Text(
+                e.message ?? 'Unknown error',
+                style: AppTextStyles.body(color: Colors.black),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('OK'),
+                  child: Text(
+                    'OK',
+                    style: AppTextStyles.buttons(color: Colors.deepPurple),
+                  ),
                 ),
               ],
             ),
@@ -61,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 30),
                 Text(
                   'Welcome Back!',
-                  style: AppTextStyles.title(color: Colors.black),
+                  style: AppTextStyles.title1(color: Colors.black),
                 ),
                 const SizedBox(height: 10),
                 Text(
