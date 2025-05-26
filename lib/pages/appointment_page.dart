@@ -1,9 +1,12 @@
+// lib/pages/appointment_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AppointmentPage extends StatefulWidget {
   final String doctorName;
-
   const AppointmentPage({super.key, required this.doctorName});
 
   @override
@@ -13,40 +16,55 @@ class AppointmentPage extends StatefulWidget {
 class _AppointmentPageState extends State<AppointmentPage> {
   final List<Appointment> _appointments = [];
 
-  void _bookAppointment(DateTime date) async {
+  Future<void> _bookAppointment(DateTime date) async {
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
+    if (pickedTime == null) return;
 
-    if (pickedTime != null) {
-      final appointmentDateTime = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        pickedTime.hour,
-        pickedTime.minute,
-      );
+    final appointmentDateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+    final endDateTime = appointmentDateTime.add(const Duration(minutes: 30));
 
-      setState(() {
-        _appointments.add(
-          Appointment(
-            startTime: appointmentDateTime,
-            endTime: appointmentDateTime.add(Duration(minutes: 30)),
-            subject: 'Appointment with ${widget.doctorName}',
-            color: Colors.deepPurple,
-          ),
-        );
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Appointment booked with ${widget.doctorName} on ${appointmentDateTime.toLocal().toString().split(".")[0]}',
-          ),
+    // 1) Aggiungi localmente
+    setState(() {
+      _appointments.add(
+        Appointment(
+          startTime: appointmentDateTime,
+          endTime: endDateTime,
+          subject: 'Appointment with ${widget.doctorName}',
+          color: Colors.deepPurple,
         ),
       );
-    }
+    });
+
+    // 2) Salva su Firestore
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('appointments')
+        .add({
+          'doctorName': widget.doctorName,
+          'startTime': appointmentDateTime.toIso8601String(),
+          'endTime': endDateTime.toIso8601String(),
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Appointment booked with ${widget.doctorName} on '
+          '${appointmentDateTime.toLocal().toString().split(".")[0]}',
+        ),
+      ),
+    );
   }
 
   @override
@@ -58,11 +76,11 @@ class _AppointmentPageState extends State<AppointmentPage> {
         child: SfCalendar(
           view: CalendarView.month,
           dataSource: _AppointmentDataSource(_appointments),
-          monthViewSettings: MonthViewSettings(
+          monthViewSettings: const MonthViewSettings(
             showAgenda: true,
             appointmentDisplayMode: MonthAppointmentDisplayMode.indicator,
           ),
-          onTap: (CalendarTapDetails details) {
+          onTap: (details) {
             if (details.targetElement == CalendarElement.calendarCell &&
                 details.date != null) {
               _bookAppointment(details.date!);
