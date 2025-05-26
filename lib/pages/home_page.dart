@@ -5,6 +5,7 @@ import 'package:medicare_app/pages/medical_card_page.dart';
 import 'package:medicare_app/pages/appointment_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:medicare_app/pages/login_page.dart';
+import 'package:medicare_app/pages/profile_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -166,14 +167,99 @@ class _HomeContentState extends State<_HomeContent> {
                       ),
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.deepPurple[100],
-                              borderRadius: BorderRadius.circular(12),
+                          // QUI ABBIAMO INSERITO IL MENU PERSONALIZZATO
+                          GestureDetector(
+                            onTapDown: (details) {
+                              final tapPosition = details.globalPosition;
+                              showMenu<String>(
+                                context: context,
+                                position: RelativeRect.fromLTRB(
+                                  tapPosition.dx,
+                                  tapPosition.dy + 10,
+                                  tapPosition.dx,
+                                  0,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                color: Colors.white,
+                                elevation: 8,
+                                items: [
+                                  PopupMenuItem<String>(
+                                    value: 'profile',
+                                    child: ListTile(
+                                      leading: const Icon(Icons.person_outline),
+                                      title: const Text('Profilo'),
+                                    ),
+                                  ),
+                                  PopupMenuItem<String>(
+                                    value: 'prescriptions',
+                                    child: ListTile(
+                                      leading: const Icon(
+                                        Icons.medication_outlined,
+                                      ),
+                                      title: const Text('Ricette'),
+                                    ),
+                                  ),
+                                  PopupMenuItem<String>(
+                                    value: 'appointments',
+                                    child: ListTile(
+                                      leading: const Icon(
+                                        Icons.event_note_outlined,
+                                      ),
+                                      title: const Text('Appuntamenti'),
+                                    ),
+                                  ),
+                                ],
+                              ).then((value) {
+                                switch (value) {
+                                  case 'profile':
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => const ProfilePage(),
+                                      ),
+                                    );
+                                    break;
+                                  case 'prescriptions':
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Sezione "Ricette" in arrivo!',
+                                        ),
+                                      ),
+                                    );
+                                    break;
+                                  case 'appointments':
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Sezione "Appuntamenti" in arrivo!',
+                                        ),
+                                      ),
+                                    );
+                                    break;
+                                }
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.deepPurple[100],
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(Icons.person),
                             ),
-                            child: const Icon(Icons.person),
                           ),
+
                           const SizedBox(width: 10),
                           IconButton(
                             icon: const Icon(Icons.logout, color: Colors.red),
@@ -222,10 +308,24 @@ class _HomeContentState extends State<_HomeContent> {
                               const SizedBox(height: 12),
                               InkWell(
                                 onTap: () {
+                                  final user =
+                                      FirebaseAuth.instance.currentUser;
+                                  if (user == null) return;
+
+                                  // Recupera displayName e splitta in nome / cognome
+                                  final fullName = user.displayName ?? '';
+                                  final parts = fullName.split(' ');
+                                  final firstName =
+                                      parts.isNotEmpty ? parts.first : '';
+                                  final lastName =
+                                      parts.length > 1
+                                          ? parts.sublist(1).join(' ')
+                                          : '';
+
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => MedicalCardPage(),
+                                      builder: (_) => const MedicalCardPage(),
                                     ),
                                   );
                                 },
