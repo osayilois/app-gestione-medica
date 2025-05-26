@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -13,15 +14,64 @@ class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
   bool isEditing = false;
 
-  // Campi modificabili
-  final TextEditingController _codiceFiscaleController =
-      TextEditingController();
-  final TextEditingController _telefonoController = TextEditingController();
-  final TextEditingController _medicoBaseController = TextEditingController();
+  final _codiceFiscaleController = TextEditingController();
+  final _telefonoController = TextEditingController();
+  final _medicoBaseController = TextEditingController();
+
+  String? codiceFiscale;
+  String? telefono;
+  String? medicoBase;
+
+  final user = FirebaseAuth.instance.currentUser;
+  final firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMedicalData();
+  }
+
+  Future<void> fetchMedicalData() async {
+    if (user == null) return;
+    final doc = await firestore.collection('users').doc(user!.uid).get();
+    final data = doc.data();
+
+    if (data != null) {
+      setState(() {
+        codiceFiscale = data['codiceFiscale'];
+        telefono = data['telefono'];
+        medicoBase = data['medicoBase'];
+
+        _codiceFiscaleController.text = codiceFiscale ?? '';
+        _telefonoController.text = telefono ?? '';
+        _medicoBaseController.text = medicoBase ?? '';
+      });
+    }
+  }
+
+  Future<void> saveChanges() async {
+    if (user == null) return;
+
+    await firestore.collection('users').doc(user!.uid).set({
+      'codiceFiscale': _codiceFiscaleController.text.trim(),
+      'telefono': _telefonoController.text.trim(),
+      'medicoBase': _medicoBaseController.text.trim(),
+    }, SetOptions(merge: true));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Informazioni salvate con successo')),
+    );
+
+    setState(() {
+      isEditing = false;
+      codiceFiscale = _codiceFiscaleController.text.trim();
+      telefono = _telefonoController.text.trim();
+      medicoBase = _medicoBaseController.text.trim();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
     final nomeCompleto = user?.displayName ?? '';
     final email = user?.email ?? '';
     final nome = nomeCompleto.split(' ').first;
@@ -48,15 +98,11 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
         child: Column(
           children: [
-            // Immagine profilo
             CircleAvatar(
               radius: 50,
               backgroundImage: NetworkImage('https://via.placeholder.com/150'),
             ),
-
             const SizedBox(height: 20),
-
-            // Blocco info lilla
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -71,33 +117,42 @@ class _ProfilePageState extends State<ProfilePage> {
                     buildInfoRow('Nome', nome),
                     buildInfoRow('Cognome', cognome),
                     buildInfoRow('Email', email),
-                    const SizedBox(height: 12),
-                    buildEditableField(
-                      'Codice Fiscale',
-                      _codiceFiscaleController,
-                    ),
-                    buildEditableField(
-                      'Telefono',
-                      _telefonoController,
-                      keyboard: TextInputType.phone,
-                    ),
-                    buildEditableField('Medico di base', _medicoBaseController),
+                    if (!isEditing && codiceFiscale != null)
+                      buildInfoRow('Codice Fiscale', codiceFiscale!),
+                    if (!isEditing && telefono != null)
+                      buildInfoRow('Telefono', telefono!),
+                    if (!isEditing && medicoBase != null)
+                      buildInfoRow('Medico di base', medicoBase!),
+
+                    if (isEditing)
+                      Column(
+                        children: [
+                          buildEditableField(
+                            'Codice Fiscale',
+                            _codiceFiscaleController,
+                          ),
+                          buildEditableField(
+                            'Telefono',
+                            _telefonoController,
+                            keyboard: TextInputType.phone,
+                          ),
+                          buildEditableField(
+                            'Medico di base',
+                            _medicoBaseController,
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),
             ),
-
             if (isEditing)
               Padding(
                 padding: const EdgeInsets.only(top: 30),
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Salvataggio dati
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Informazioni salvate.')),
-                      );
-                      setState(() => isEditing = false);
+                      saveChanges();
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -142,8 +197,8 @@ class _ProfilePageState extends State<ProfilePage> {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: TextFormField(
         controller: controller,
-        enabled: isEditing,
         keyboardType: keyboard,
+        enabled: isEditing,
         style: AppTextStyles.body(color: Colors.black),
         decoration: InputDecoration(
           labelText: label,
@@ -160,7 +215,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         validator: (value) {
-          if (isEditing && (value == null || value.isEmpty)) {
+          if (value == null || value.isEmpty) {
             return 'Campo obbligatorio';
           }
           return null;
