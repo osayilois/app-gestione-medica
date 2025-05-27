@@ -1,3 +1,5 @@
+// lib/pages/profile_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,13 +16,22 @@ class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
   bool isEditing = false;
 
+  // controllers per i campi editabili
   final _codiceFiscaleController = TextEditingController();
   final _telefonoController = TextEditingController();
   final _medicoBaseController = TextEditingController();
 
+  // dati per la view non-editabile
   String? codiceFiscale;
   String? telefono;
   String? medicoBase;
+
+  // dati medicalCard
+  DateTime? birthDate;
+  String? bloodType;
+  String? allergies;
+  String? conditions;
+  String? therapy;
 
   final user = FirebaseAuth.instance.currentUser;
   final firestore = FirebaseFirestore.instance;
@@ -28,28 +39,38 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    fetchMedicalData();
+    _loadAllData();
   }
 
-  Future<void> fetchMedicalData() async {
+  Future<void> _loadAllData() async {
     if (user == null) return;
     final doc = await firestore.collection('users').doc(user!.uid).get();
-    final data = doc.data();
+    final data = doc.data() ?? {};
 
-    if (data != null) {
-      setState(() {
-        codiceFiscale = data['codiceFiscale'];
-        telefono = data['telefono'];
-        medicoBase = data['medicoBase'];
+    setState(() {
+      // general info
+      codiceFiscale = data['codiceFiscale'];
+      telefono = data['telefono'];
+      medicoBase = data['medicoBase'];
+      _codiceFiscaleController.text = codiceFiscale ?? '';
+      _telefonoController.text = telefono ?? '';
+      _medicoBaseController.text = medicoBase ?? '';
 
-        _codiceFiscaleController.text = codiceFiscale ?? '';
-        _telefonoController.text = telefono ?? '';
-        _medicoBaseController.text = medicoBase ?? '';
-      });
-    }
+      // medicalCard
+      final mc = data['medicalCard'] as Map<String, dynamic>?;
+      if (mc != null) {
+        birthDate =
+            mc['birthDate'] != null ? DateTime.parse(mc['birthDate']) : null;
+        bloodType = mc['bloodType'];
+        allergies = mc['allergies'];
+        conditions = mc['conditions'];
+        therapy = mc['therapy'];
+      }
+    });
   }
 
-  Future<void> saveChanges() async {
+  Future<void> _saveGeneralInfo() async {
+    if (!_formKey.currentState!.validate()) return;
     if (user == null) return;
 
     await firestore.collection('users').doc(user!.uid).set({
@@ -88,25 +109,39 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit, color: Colors.deepPurple),
+            icon: Icon(
+              isEditing ? Icons.close : Icons.edit,
+              color: Colors.deepPurple,
+            ),
             onPressed: () => setState(() => isEditing = !isEditing),
-            tooltip: isEditing ? 'Annulla' : 'Modifica',
+            tooltip: isEditing ? 'Cancel' : 'Edit',
           ),
         ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Avatar
             CircleAvatar(
               radius: 50,
               backgroundImage: NetworkImage('https://via.placeholder.com/150'),
             ),
             const SizedBox(height: 20),
+
+            // --- General Information ---
+            Text(
+              'General Information',
+              style: AppTextStyles.subtitle(
+                color: Colors.deepPurple,
+              ).copyWith(fontSize: 16),
+            ),
+            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.deepPurple[100],
+                color: Colors.deepPurple[50],
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Form(
@@ -117,57 +152,94 @@ class _ProfilePageState extends State<ProfilePage> {
                     buildInfoRow('Name', nome),
                     buildInfoRow('Surname', cognome),
                     buildInfoRow('Email', email),
-                    if (!isEditing && codiceFiscale != null)
-                      buildInfoRow('Fiscal Code', codiceFiscale!),
-                    if (!isEditing && telefono != null)
-                      buildInfoRow('Phone Number', telefono!),
-                    if (!isEditing && medicoBase != null)
-                      buildInfoRow('Medical Practitioner', medicoBase!),
+                    const SizedBox(height: 12),
 
-                    if (isEditing)
-                      Column(
-                        children: [
-                          buildEditableField(
-                            'Fiscal Code',
-                            _codiceFiscaleController,
-                          ),
-                          buildEditableField(
-                            'Phone Number',
-                            _telefonoController,
-                            keyboard: TextInputType.phone,
-                          ),
-                          buildEditableField(
-                            'Medical Practitioner',
-                            _medicoBaseController,
-                          ),
-                        ],
+                    // campi editabili
+                    if (!isEditing) ...[
+                      if (codiceFiscale != null)
+                        buildInfoRow('Fiscal Code', codiceFiscale!),
+                      if (telefono != null)
+                        buildInfoRow('Phone Number', telefono!),
+                      if (medicoBase != null)
+                        buildInfoRow('Medical Practitioner', medicoBase!),
+                    ] else ...[
+                      buildEditableField(
+                        'Fiscal Code',
+                        _codiceFiscaleController,
                       ),
+                      buildEditableField(
+                        'Phone Number',
+                        _telefonoController,
+                        keyboard: TextInputType.phone,
+                      ),
+                      buildEditableField(
+                        'Medical Practitioner',
+                        _medicoBaseController,
+                      ),
+                    ],
                   ],
                 ),
               ),
             ),
-            if (isEditing)
-              Padding(
-                padding: const EdgeInsets.only(top: 30),
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      saveChanges();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 40,
-                      vertical: 12,
-                    ),
-                  ),
-                  child: Text(
-                    'Save',
-                    style: AppTextStyles.buttons(color: Colors.white),
+            if (isEditing) ...[
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _saveGeneralInfo,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 12,
                   ),
                 ),
+                child: Text(
+                  'Save',
+                  style: AppTextStyles.buttons(color: Colors.white),
+                ),
               ),
+            ],
+
+            const SizedBox(height: 30),
+
+            // --- Medical Information ---
+            Text(
+              'Medical Information',
+              style: AppTextStyles.subtitle(
+                color: Colors.deepPurple,
+              ).copyWith(fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple[50],
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (birthDate != null)
+                    buildInfoRow(
+                      'Date of Birth',
+                      '${birthDate!.day.toString().padLeft(2, '0')}/${birthDate!.month.toString().padLeft(2, '0')}/${birthDate!.year}',
+                    ),
+                  if (bloodType != null) buildInfoRow('Blood Type', bloodType!),
+                  if (allergies != null) buildInfoRow('Allergies', allergies!),
+                  if (conditions != null)
+                    buildInfoRow('Conditions', conditions!),
+                  if (therapy != null) buildInfoRow('Therapy', therapy!),
+                  if (birthDate == null &&
+                      bloodType == null &&
+                      allergies == null &&
+                      conditions == null &&
+                      therapy == null)
+                    Text(
+                      'No medical information yet.',
+                      style: AppTextStyles.body(color: Colors.grey[600]!),
+                    ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -215,8 +287,8 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Campo obbligatorio';
+          if (isEditing && (value == null || value.isEmpty)) {
+            return 'Required field';
           }
           return null;
         },
