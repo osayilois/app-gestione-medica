@@ -190,7 +190,7 @@ class _HomeContentState extends State<_HomeContent> {
                                     value: 'profile',
                                     child: ListTile(
                                       leading: const Icon(Icons.person_outline),
-                                      title: const Text('Profilo'),
+                                      title: const Text('Profile'),
                                     ),
                                   ),
                                   PopupMenuItem<String>(
@@ -199,7 +199,7 @@ class _HomeContentState extends State<_HomeContent> {
                                       leading: const Icon(
                                         Icons.medication_outlined,
                                       ),
-                                      title: const Text('Ricette'),
+                                      title: const Text('Prescriptions'),
                                     ),
                                   ),
                                   PopupMenuItem<String>(
@@ -208,7 +208,7 @@ class _HomeContentState extends State<_HomeContent> {
                                       leading: const Icon(
                                         Icons.event_note_outlined,
                                       ),
-                                      title: const Text('Appuntamenti'),
+                                      title: const Text('Appointments'),
                                     ),
                                   ),
                                 ],

@@ -83,7 +83,7 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
-          'Profilo',
+          'Profile',
           style: AppTextStyles.title1(color: Colors.deepPurple),
         ),
         actions: [
@@ -114,30 +114,30 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    buildInfoRow('Nome', nome),
-                    buildInfoRow('Cognome', cognome),
+                    buildInfoRow('Name', nome),
+                    buildInfoRow('Surname', cognome),
                     buildInfoRow('Email', email),
                     if (!isEditing && codiceFiscale != null)
-                      buildInfoRow('Codice Fiscale', codiceFiscale!),
+                      buildInfoRow('Fiscal Code', codiceFiscale!),
                     if (!isEditing && telefono != null)
-                      buildInfoRow('Telefono', telefono!),
+                      buildInfoRow('Phone Number', telefono!),
                     if (!isEditing && medicoBase != null)
-                      buildInfoRow('Medico di base', medicoBase!),
+                      buildInfoRow('Medical Practitioner', medicoBase!),
 
                     if (isEditing)
                       Column(
                         children: [
                           buildEditableField(
-                            'Codice Fiscale',
+                            'Fiscal Code',
                             _codiceFiscaleController,
                           ),
                           buildEditableField(
-                            'Telefono',
+                            'Phone Number',
                             _telefonoController,
                             keyboard: TextInputType.phone,
                           ),
                           buildEditableField(
-                            'Medico di base',
+                            'Medical Practitioner',
                             _medicoBaseController,
                           ),
                         ],
@@ -163,7 +163,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   child: Text(
-                    'Salva modifiche',
+                    'Save',
                     style: AppTextStyles.buttons(color: Colors.white),
                   ),
                 ),

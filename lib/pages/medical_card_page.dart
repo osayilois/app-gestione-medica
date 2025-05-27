@@ -85,9 +85,9 @@ class _MedicalCardPageState extends State<MedicalCardPage> {
         .set(data, SetOptions(merge: true));
 
     setState(() => _isLoading = false);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Medical card saved!')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Medical card saved in your profile!')),
+    );
     Navigator.pop(context);
   }
 
