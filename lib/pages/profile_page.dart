@@ -80,7 +80,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }, SetOptions(merge: true));
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Informazioni salvate con successo')),
+      const SnackBar(content: Text('Information saved successfully!')),
     );
 
     setState(() {
@@ -105,7 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
         elevation: 0,
         title: Text(
           'Profile',
-          style: AppTextStyles.title1(color: Colors.deepPurple),
+          style: AppTextStyles.title2(color: Colors.deepPurple),
         ),
         actions: [
           IconButton(
@@ -240,7 +240,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
             ),
-          ],
+          ], //children
         ),
       ),
     );

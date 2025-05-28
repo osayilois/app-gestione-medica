@@ -10,6 +10,14 @@ class AppTextStyles {
       color: color,
     ),
   );
+  // font per titoli con poppins
+  static TextStyle title2({Color color = Colors.black}) => GoogleFonts.poppins(
+    textStyle: TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: color,
+    ),
+  );
 
   // font per titoli con CalSans
   static TextStyle title({Color color = Colors.black}) => TextStyle(

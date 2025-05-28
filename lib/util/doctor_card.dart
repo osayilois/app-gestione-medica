@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicare_app/theme/text_styles.dart';
 
 class DoctorCard extends StatelessWidget {
   final String doctorImagePath;
@@ -36,7 +37,7 @@ class DoctorCard extends StatelessWidget {
             Row(
               children: [
                 Icon(Icons.star, color: Colors.yellow[600]),
-                Text(rating, style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(rating, style: AppTextStyles.link(color: Colors.black)),
               ],
             ),
 
@@ -45,11 +46,14 @@ class DoctorCard extends StatelessWidget {
             //doctor name
             Text(
               doctorName,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: AppTextStyles.subtitle(color: Colors.black),
             ),
 
             //doctor title
-            Text('$doctorProfession 25 y.e.'),
+            Text(
+              '$doctorProfession 25 y.e.',
+              style: AppTextStyles.body(color: Colors.black),
+            ),
           ],
         ),
       ),

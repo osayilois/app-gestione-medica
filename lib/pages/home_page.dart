@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:medicare_app/theme/text_styles.dart';
 import 'package:medicare_app/util/doctor_card.dart';
 import 'package:medicare_app/pages/medical_card_page.dart';
 import 'package:medicare_app/pages/appointment_page.dart';
@@ -149,20 +150,14 @@ class _HomeContentState extends State<_HomeContent> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Hello,',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
+                            style: AppTextStyles.title2(color: Colors.black),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             getUserDisplayName(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
+                            style: AppTextStyles.title1(color: Colors.black),
                           ),
                         ],
                       ),
@@ -190,7 +185,12 @@ class _HomeContentState extends State<_HomeContent> {
                                     value: 'profile',
                                     child: ListTile(
                                       leading: const Icon(Icons.person_outline),
-                                      title: const Text('Profile'),
+                                      title: Text(
+                                        'Profile',
+                                        style: AppTextStyles.subtitle(
+                                          color: Colors.black,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   PopupMenuItem<String>(
@@ -199,7 +199,12 @@ class _HomeContentState extends State<_HomeContent> {
                                       leading: const Icon(
                                         Icons.medication_outlined,
                                       ),
-                                      title: const Text('Prescriptions'),
+                                      title: Text(
+                                        'Prescriptions',
+                                        style: AppTextStyles.subtitle(
+                                          color: Colors.black,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   PopupMenuItem<String>(
@@ -208,7 +213,12 @@ class _HomeContentState extends State<_HomeContent> {
                                       leading: const Icon(
                                         Icons.event_note_outlined,
                                       ),
-                                      title: const Text('Appointments'),
+                                      title: Text(
+                                        'Appointments',
+                                        style: AppTextStyles.subtitle(
+                                          color: Colors.black,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -296,17 +306,16 @@ class _HomeContentState extends State<_HomeContent> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'How do you feel?',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                style: AppTextStyles.subtitle(
+                                  color: Colors.black,
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              const Text(
+                              Text(
                                 'Fill out your medical card right now',
-                                style: TextStyle(fontSize: 14),
+                                style: AppTextStyles.body(color: Colors.black),
                               ),
                               const SizedBox(height: 12),
                               InkWell(
@@ -338,10 +347,12 @@ class _HomeContentState extends State<_HomeContent> {
                                     color: Colors.deepPurple[300],
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: const Center(
+                                  child: Center(
                                     child: Text(
                                       'Get Started',
-                                      style: TextStyle(color: Colors.white),
+                                      style: AppTextStyles.buttons(
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -365,10 +376,11 @@ class _HomeContentState extends State<_HomeContent> {
                     child: TextField(
                       controller: _searchController,
                       onChanged: _filterDoctors,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         prefixIcon: Icon(Icons.search),
                         border: InputBorder.none,
                         hintText: 'Type doctor name',
+                        hintStyle: AppTextStyles.body(color: Colors.black),
                       ),
                     ),
                   ),
@@ -379,6 +391,7 @@ class _HomeContentState extends State<_HomeContent> {
                   child: DropdownButton<String>(
                     value: selectedSpecialty,
                     isExpanded: true,
+                    style: AppTextStyles.subtitle(color: Colors.black),
                     items:
                         ['All', 'Therapist', 'Dentist', 'Surgeon']
                             .map(
@@ -392,17 +405,14 @@ class _HomeContentState extends State<_HomeContent> {
                   ),
                 ),
                 const SizedBox(height: 25),
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         'Doctor list',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
+                        style: AppTextStyles.title2(color: Colors.black),
                       ),
                     ],
                   ),

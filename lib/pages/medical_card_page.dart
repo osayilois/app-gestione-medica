@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:medicare_app/theme/text_styles.dart';
 
 class MedicalCardPage extends StatefulWidget {
   const MedicalCardPage({super.key});
@@ -48,8 +49,8 @@ class _MedicalCardPageState extends State<MedicalCardPage> {
         });
       }
     } catch (e) {
-      // Se fallisce, logga e continua (non blocchi l'UI)
-      print('⚠️ Errore caricando medicalCard: $e');
+      // Non blocchiamo l'UI
+      debugPrint('⚠️ Errore caricando medicalCard: $e');
     }
   }
 
@@ -101,112 +102,189 @@ class _MedicalCardPageState extends State<MedicalCardPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Recupero il nome completo e lo mostro in alto:
-    final fullName = FirebaseAuth.instance.currentUser?.displayName ?? '';
-    final parts = fullName.split(' ');
-    final displayName = parts.join(' ');
-
+    final fullName =
+        FirebaseAuth.instance.currentUser?.displayName ?? 'Your Name';
     return Scaffold(
-      appBar: AppBar(title: const Text('Medical Card')),
+      appBar: AppBar(
+        title: Text(
+          'Medical Card',
+          style: AppTextStyles.title2(color: Colors.white),
+        ),
+        backgroundColor: Colors.deepPurple[300],
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              // Titolo con nome utente
-              if (displayName.isNotEmpty) ...[
-                Center(
-                  child: Text(
-                    displayName,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
-
-              // Date of Birth picker
-              GestureDetector(
-                onTap: _pickDate,
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Date of Birth',
-                    border: OutlineInputBorder(),
-                  ),
-                  child: Text(
-                    _birth == null
-                        ? 'Tap to select'
-                        : DateFormat('dd/MM/yyyy').format(_birth!),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Blood Type dropdown
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Blood Type',
-                  border: OutlineInputBorder(),
-                ),
-                value: _bloodType,
-                items:
-                    _bloodTypes
-                        .map(
-                          (bt) => DropdownMenuItem(value: bt, child: Text(bt)),
-                        )
-                        .toList(),
-                onChanged: (v) => setState(() => _bloodType = v),
-                validator: (v) => v == null ? 'Required' : null,
-              ),
-              const SizedBox(height: 16),
-
-              // Allergies
-              TextFormField(
-                controller: _allergies,
-                decoration: const InputDecoration(
-                  labelText: 'Allergies',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Medical Conditions
-              TextFormField(
-                controller: _conditions,
-                decoration: const InputDecoration(
-                  labelText: 'Medical Conditions',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Therapy
-              TextFormField(
-                controller: _therapy,
-                decoration: const InputDecoration(
-                  labelText: 'Therapy',
-                  border: OutlineInputBorder(),
+              // -------------------
+              // Header con nome utente
+              // -------------------
+              Center(
+                child: Text(
+                  fullName,
+                  style: AppTextStyles.title1(color: Colors.deepPurple[300]!),
                 ),
               ),
               const SizedBox(height: 24),
 
-              // Save button
-              ElevatedButton(
-                onPressed: _isLoading ? null : _save,
-                child:
-                    _isLoading
-                        ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+              // -------------------
+              // Sezione Medical Card
+              // -------------------
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Date of Birth
+                    Text(
+                      'Date of Birth',
+                      style: AppTextStyles.subtitle(color: Colors.black),
+                    ),
+                    const SizedBox(height: 6),
+                    GestureDetector(
+                      onTap: _pickDate,
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        )
-                        : const Text('Save'),
+                        ),
+
+                        child: Text(
+                          _birth == null
+                              ? 'Tap to select'
+                              : DateFormat('dd/MM/yyyy').format(_birth!),
+                          style: AppTextStyles.body(color: Colors.black),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Blood Type
+                    Text(
+                      'Blood Type',
+                      style: AppTextStyles.subtitle(color: Colors.black),
+                    ),
+                    const SizedBox(height: 6),
+                    DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      value: _bloodType,
+                      items:
+                          _bloodTypes
+                              .map(
+                                (bt) => DropdownMenuItem(
+                                  value: bt,
+                                  child: Text(
+                                    bt,
+                                    style: AppTextStyles.body(
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (v) => setState(() => _bloodType = v),
+                      validator: (v) => v == null ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Allergies
+                    Text(
+                      'Allergies',
+                      style: AppTextStyles.subtitle(color: Colors.black),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _allergies,
+                      decoration: InputDecoration(
+                        hintText: 'Enter allergies',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      style: AppTextStyles.body(color: Colors.black),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Medical Conditions
+                    Text(
+                      'Medical Conditions',
+                      style: AppTextStyles.subtitle(color: Colors.black),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _conditions,
+                      decoration: InputDecoration(
+                        hintText: 'Enter conditions',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      style: AppTextStyles.body(color: Colors.black),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Therapy
+                    Text(
+                      'Therapy',
+                      style: AppTextStyles.subtitle(color: Colors.black),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _therapy,
+                      decoration: InputDecoration(
+                        hintText: 'Enter therapy',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      style: AppTextStyles.body(color: Colors.black),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // -------------------
+              // Bottone Save
+              // -------------------
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _save,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple[300],
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child:
+                      _isLoading
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : Text(
+                            'Save',
+                            style: AppTextStyles.buttons(color: Colors.white),
+                          ),
+                ),
               ),
             ],
           ),
