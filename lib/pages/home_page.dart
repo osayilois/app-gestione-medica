@@ -101,21 +101,63 @@ class _HomeContentState extends State<_HomeContent> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Confirm Logout'),
-            content: const Text('Are you sure you want to log out?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text(
-                  'Logout',
-                  style: TextStyle(color: Colors.red),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ANIMAZIONE LOTTIE
+                SizedBox(
+                  height: 120,
+                  child: Lottie.asset(
+                    'assets/animations/logout.json', // Scegli un'animazione e salvala qui
+                    repeat: false,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+
+                // MESSAGGIO CENTRATO
+                Text(
+                  'Are you sure you want to log out?',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.title2(color: Colors.black),
+                ),
+
+                const SizedBox(height: 20),
+
+                // BOTTONE LOGOUT
+                SizedBox(
+                  width: 150,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.deepPurple[300],
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      textStyle: AppTextStyles.buttons(),
+                    ),
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Logout'),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // BOTTONE CANCEL SENZA RIQUADRO
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(
+                    'Cancel',
+                    style: AppTextStyles.buttons(
+                      color: Colors.deepPurple[300]!,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
     );
 
@@ -163,7 +205,6 @@ class _HomeContentState extends State<_HomeContent> {
                       ),
                       Row(
                         children: [
-                          // QUI ABBIAMO INSERITO IL MENU PERSONALIZZATO
                           GestureDetector(
                             onTapDown: (details) {
                               final tapPosition = details.globalPosition;
@@ -221,6 +262,22 @@ class _HomeContentState extends State<_HomeContent> {
                                       ),
                                     ),
                                   ),
+                                  const PopupMenuDivider(),
+                                  PopupMenuItem<String>(
+                                    value: 'logout',
+                                    child: ListTile(
+                                      leading: const Icon(
+                                        Icons.logout,
+                                        color: Colors.red,
+                                      ),
+                                      title: Text(
+                                        'Logout',
+                                        style: AppTextStyles.subtitle(
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ).then((value) {
                                 switch (value) {
@@ -251,7 +308,8 @@ class _HomeContentState extends State<_HomeContent> {
                                       ),
                                     );
                                     break;
-
+                                  case 'logout':
+                                    _confirmLogout();
                                     break;
                                 }
                               });
@@ -271,12 +329,6 @@ class _HomeContentState extends State<_HomeContent> {
                               ),
                               child: const Icon(Icons.person),
                             ),
-                          ),
-
-                          const SizedBox(width: 10),
-                          IconButton(
-                            icon: const Icon(Icons.logout, color: Colors.red),
-                            onPressed: _confirmLogout,
                           ),
                         ],
                       ),
