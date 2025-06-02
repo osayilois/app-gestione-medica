@@ -1,13 +1,18 @@
+// lib/pages/home_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 import 'package:medicare_app/util/doctor_card.dart';
+import 'package:medicare_app/util/category_card.dart';
 import 'package:medicare_app/pages/medical_card_page.dart';
 import 'package:medicare_app/pages/appointment_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:medicare_app/pages/login_page.dart';
 import 'package:medicare_app/pages/profile_page.dart';
 import 'package:medicare_app/pages/appointments_list_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -66,10 +71,68 @@ class _HomeContentState extends State<_HomeContent> {
   String selectedSpecialty = 'All';
   List<Map<String, String>> filteredDoctors = [];
 
+  // Categorie
+  final List<Map<String, dynamic>> categories = [
+    {
+      'name': 'Cardiologist',
+      'iconData': MdiIcons.heartPulse,
+      'color': Colors.red.shade300,
+    },
+    {
+      'name': 'Dentist',
+      'iconData': MdiIcons.tooth,
+      'color': Colors.blue.shade300,
+    },
+    {
+      'name': 'Eye Specialist',
+      'iconData': MdiIcons.eye,
+      'color': Colors.orange.shade300,
+    },
+    {
+      'name': 'Orthopaedic',
+      'iconData': Icons.wheelchair_pickup_sharp,
+      'color': Colors.teal.shade300,
+    },
+    {
+      'name': 'Paediatrician',
+      'iconData': MdiIcons.baby,
+      'color': Colors.green.shade300,
+    },
+    {
+      'name': 'Neurologist',
+      'iconData': MdiIcons.brain,
+      'color': Colors.purple.shade300,
+    },
+    {
+      'name': 'Psychiatrist',
+      'iconData': MdiIcons.emoticonHappy,
+      'color': Colors.pink.shade300,
+    },
+    {
+      'name': 'Dermatologist',
+      'iconData': MdiIcons.faceManShimmer,
+      'color': Colors.brown.shade300,
+    },
+  ];
+
+  bool _hasMedical = false; // se ha già compilato medicalCard
+  final _firestore = FirebaseFirestore.instance;
+
   @override
   void initState() {
     super.initState();
     filteredDoctors = doctors;
+    _checkMedicalCard();
+  }
+
+  Future<void> _checkMedicalCard() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final doc = await _firestore.collection('users').doc(user.uid).get();
+    final data = doc.data();
+    setState(() {
+      _hasMedical = data?['medicalCard'] != null;
+    });
   }
 
   void _filterDoctors(String query) {
@@ -112,21 +175,18 @@ class _HomeContentState extends State<_HomeContent> {
                 SizedBox(
                   height: 120,
                   child: Lottie.asset(
-                    'assets/animations/logout.json', // Scegli un'animazione e salvala qui
+                    'assets/animations/logout.json',
                     repeat: false,
                   ),
                 ),
                 const SizedBox(height: 12),
-
                 // MESSAGGIO CENTRATO
                 Text(
                   'Are you sure you want to log out?',
                   textAlign: TextAlign.center,
                   style: AppTextStyles.title2(color: Colors.black),
                 ),
-
                 const SizedBox(height: 20),
-
                 // BOTTONE LOGOUT
                 SizedBox(
                   width: 150,
@@ -143,9 +203,7 @@ class _HomeContentState extends State<_HomeContent> {
                     child: const Text('Logout'),
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
                 // BOTTONE CANCEL SENZA RIQUADRO
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
@@ -169,9 +227,7 @@ class _HomeContentState extends State<_HomeContent> {
   String getUserDisplayName() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return 'User';
-
-    final fullName = user.displayName ?? 'User';
-    final firstName = fullName.split(' ').first;
+    final firstName = (user.displayName ?? 'User').split(' ').first;
     return firstName;
   }
 
@@ -184,6 +240,7 @@ class _HomeContentState extends State<_HomeContent> {
             padding: const EdgeInsets.symmetric(vertical: 20.0),
             child: Column(
               children: [
+                // HEADER
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
@@ -203,241 +260,310 @@ class _HomeContentState extends State<_HomeContent> {
                           ),
                         ],
                       ),
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTapDown: (details) {
-                              final tapPosition = details.globalPosition;
-                              showMenu<String>(
-                                context: context,
-                                position: RelativeRect.fromLTRB(
-                                  tapPosition.dx,
-                                  tapPosition.dy + 10,
-                                  tapPosition.dx,
-                                  0,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                color: Colors.white,
-                                elevation: 8,
-                                items: [
-                                  PopupMenuItem<String>(
-                                    value: 'profile',
-                                    child: ListTile(
-                                      leading: const Icon(Icons.person_outline),
-                                      title: Text(
-                                        'Profile',
-                                        style: AppTextStyles.subtitle(
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  PopupMenuItem<String>(
-                                    value: 'prescriptions',
-                                    child: ListTile(
-                                      leading: const Icon(
-                                        Icons.medication_outlined,
-                                      ),
-                                      title: Text(
-                                        'Prescriptions',
-                                        style: AppTextStyles.subtitle(
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  PopupMenuItem<String>(
-                                    value: 'appointments',
-                                    child: ListTile(
-                                      leading: const Icon(
-                                        Icons.event_note_outlined,
-                                      ),
-                                      title: Text(
-                                        'Appointments',
-                                        style: AppTextStyles.subtitle(
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const PopupMenuDivider(),
-                                  PopupMenuItem<String>(
-                                    value: 'logout',
-                                    child: ListTile(
-                                      leading: const Icon(
-                                        Icons.logout,
-                                        color: Colors.red,
-                                      ),
-                                      title: Text(
-                                        'Logout',
-                                        style: AppTextStyles.subtitle(
-                                          color: Colors.red,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ).then((value) {
-                                switch (value) {
-                                  case 'profile':
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder:
-                                            (context) => const ProfilePage(),
-                                      ),
-                                    );
-                                    break;
-                                  case 'prescriptions':
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Sezione "Ricette" in arrivo!',
-                                        ),
-                                      ),
-                                    );
-                                    break;
-                                  case 'appointments':
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder:
-                                            (_) => const AppointmentsListPage(),
-                                      ),
-                                    );
-                                    break;
-                                  case 'logout':
-                                    _confirmLogout();
-                                    break;
-                                }
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.deepPurple[100],
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(Icons.person),
+                      // MENU -> Profile, Prescriptions, Appointments, Logout
+                      GestureDetector(
+                        onTapDown: (details) {
+                          final pos = details.globalPosition;
+                          showMenu<String>(
+                            context: context,
+                            position: RelativeRect.fromLTRB(
+                              pos.dx,
+                              pos.dy + 10,
+                              pos.dx,
+                              0,
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 25),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.pink[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          height: 100,
-                          width: 100,
-                          child: Lottie.network(
-                            'https://assets2.lottiefiles.com/packages/lf20_tutvdkg0.json',
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'How do you feel?',
-                                style: AppTextStyles.subtitle(
-                                  color: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            color: Colors.white,
+                            elevation: 8,
+                            items: [
+                              PopupMenuItem(
+                                value: 'profile',
+                                child: ListTile(
+                                  leading: const Icon(Icons.person_outline),
+                                  title: Text(
+                                    'Profile',
+                                    style: AppTextStyles.subtitle(
+                                      color: Colors.black,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Fill out your medical card right now',
-                                style: AppTextStyles.body(color: Colors.black),
-                              ),
-                              const SizedBox(height: 12),
-                              InkWell(
-                                onTap: () {
-                                  final user =
-                                      FirebaseAuth.instance.currentUser;
-                                  if (user == null) return;
-
-                                  // Recupera displayName e splitta in nome / cognome
-                                  final fullName = user.displayName ?? '';
-                                  final parts = fullName.split(' ');
-                                  final firstName =
-                                      parts.isNotEmpty ? parts.first : '';
-                                  final lastName =
-                                      parts.length > 1
-                                          ? parts.sublist(1).join(' ')
-                                          : '';
-
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const MedicalCardPage(),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.deepPurple[300],
-                                    borderRadius: BorderRadius.circular(12),
+                              PopupMenuItem(
+                                value: 'prescriptions',
+                                child: ListTile(
+                                  leading: const Icon(
+                                    Icons.medication_outlined,
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      'Get Started',
-                                      style: AppTextStyles.buttons(
-                                        color: Colors.white,
-                                      ),
+                                  title: Text(
+                                    'Prescriptions',
+                                    style: AppTextStyles.subtitle(
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'appointments',
+                                child: ListTile(
+                                  leading: const Icon(
+                                    Icons.event_note_outlined,
+                                  ),
+                                  title: Text(
+                                    'Appointments',
+                                    style: AppTextStyles.subtitle(
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const PopupMenuDivider(),
+                              PopupMenuItem(
+                                value: 'logout',
+                                child: ListTile(
+                                  leading: const Icon(
+                                    Icons.logout,
+                                    color: Colors.red,
+                                  ),
+                                  title: Text(
+                                    'Logout',
+                                    style: AppTextStyles.subtitle(
+                                      color: Colors.red,
                                     ),
                                   ),
                                 ),
                               ),
                             ],
+                          ).then((value) {
+                            switch (value) {
+                              case 'profile':
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const ProfilePage(),
+                                  ),
+                                );
+                                break;
+                              case 'prescriptions':
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Sezione "Ricette" in arrivo!',
+                                    ),
+                                  ),
+                                );
+                                break;
+                              case 'appointments':
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (_) => const AppointmentsListPage(),
+                                  ),
+                                );
+                                break;
+                              case 'logout':
+                                _confirmLogout();
+                                break;
+                            }
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.deepPurple[100],
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
+                          child: const Icon(Icons.person),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
+
                 const SizedBox(height: 25),
+
+                // BANNER o TITOLO
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.deepPurple[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: _filterDoctors,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.search),
-                        border: InputBorder.none,
-                        hintText: 'Type doctor name',
-                        hintStyle: AppTextStyles.body(color: Colors.black),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (!_hasMedical) ...[
+                        // 1) banner "Get Started" (solo al primo login)
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.pink[100],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                height: 80,
+                                width: 80,
+                                child: Lottie.network(
+                                  'https://assets2.lottiefiles.com/packages/lf20_tutvdkg0.json',
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'How do you feel?',
+                                      style: AppTextStyles.subtitle(
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Fill out your medical card right now',
+                                      style: AppTextStyles.body(
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (_) => const MedicalCardPage(),
+                                          ),
+                                        ).then((_) => _checkMedicalCard());
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 10,
+                                          horizontal: 16,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.deepPurple[300],
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Get Started',
+                                          style: AppTextStyles.buttons(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // 2) titolo sotto il banner
+                        Text(
+                          'Find your doctor',
+                          style: AppTextStyles.bigtitle(color: Colors.black),
+                        ),
+                      ] else ...[
+                        // utente già compilato -> titolo in alto
+                        Text(
+                          'Find your doctor',
+                          style: AppTextStyles.bigtitle(color: Colors.black),
+                        ),
+                      ],
+
+                      const SizedBox(height: 24),
+
+                      // 3) search bar personalizzata (leggermente più alta)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200], // grigio chiaro
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _searchController,
+                                onChanged: _filterDoctors,
+                                decoration: InputDecoration(
+                                  hintText: 'Search doctor',
+                                  hintStyle: AppTextStyles.body(
+                                    color: Colors.grey[600]!,
+                                  ),
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                            // il bottone rotondo lilla
+                            Material(
+                              color: Colors.deepPurple[300], // tema lilla
+                              shape: const CircleBorder(),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.search,
+                                  color: Colors.white,
+                                ),
+                                onPressed:
+                                    () =>
+                                        _filterDoctors(_searchController.text),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 25),
+
+                // mini TITOLO "Specialists"
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Specialists',
+                      style: AppTextStyles.title2(color: Colors.deepPurple),
                     ),
                   ),
                 ),
+
+                const SizedBox(height: 12),
+
+                // CATEGORIE SCORREVOLI ORIZZONTALI (4x4 più compatte)
+                SizedBox(
+                  height: 120,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) {
+                      final cat = categories[index];
+                      return CategoryCard(
+                        iconData: cat['iconData'],
+                        categoryName: cat['name'],
+                        backgroundColor: cat['color'],
+                      );
+                    },
+                  ),
+                ),
+
                 const SizedBox(height: 25),
+
+                // SPECIALTY DROPDOWN
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: DropdownButton<String>(
@@ -447,37 +573,39 @@ class _HomeContentState extends State<_HomeContent> {
                     items:
                         ['All', 'Therapist', 'Dentist', 'Surgeon']
                             .map(
-                              (specialty) => DropdownMenuItem<String>(
-                                value: specialty,
-                                child: Text(specialty),
-                              ),
+                              (s) => DropdownMenuItem(value: s, child: Text(s)),
                             )
                             .toList(),
                     onChanged: _onSpecialtyChanged,
                   ),
                 ),
+
                 const SizedBox(height: 25),
+
+                // DOCTOR LIST
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 25.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         'Doctor list',
-                        style: AppTextStyles.title2(color: Colors.black),
+                        style: AppTextStyles.title2(color: Colors.deepPurple),
                       ),
                     ],
                   ),
                 ),
+
                 const SizedBox(height: 20),
+
                 SizedBox(
                   height: 250,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: filteredDoctors.length,
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                    itemBuilder: (context, index) {
-                      final doctor = filteredDoctors[index];
+                    itemBuilder: (context, i) {
+                      final doc = filteredDoctors[i];
                       return Padding(
                         padding: const EdgeInsets.only(right: 15),
                         child: GestureDetector(
@@ -486,17 +614,17 @@ class _HomeContentState extends State<_HomeContent> {
                               context,
                               MaterialPageRoute(
                                 builder:
-                                    (context) => AppointmentPage(
-                                      doctorName: doctor['name']!,
+                                    (_) => AppointmentPage(
+                                      doctorName: doc['name']!,
                                     ),
                               ),
                             );
                           },
                           child: DoctorCard(
-                            doctorImagePath: doctor['image']!,
-                            rating: doctor['rating']!,
-                            doctorName: doctor['name']!,
-                            doctorProfession: doctor['specialty']!,
+                            doctorImagePath: doc['image']!,
+                            rating: doc['rating']!,
+                            doctorName: doc['name']!,
+                            doctorProfession: doc['specialty']!,
                           ),
                         ),
                       );

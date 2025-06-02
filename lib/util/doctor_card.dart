@@ -1,3 +1,5 @@
+// lib/util/doctor_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 
@@ -18,41 +20,57 @@ class DoctorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 25.0),
+      padding: const EdgeInsets.only(left: 12.0),
       child: Container(
-        padding: EdgeInsets.all(20),
+        width: 160,
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.deepPurple[100],
-          borderRadius: BorderRadius.circular(12),
+          color: Colors.deepPurple[50],
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            //picture of doctor
+            // immagine del dottore
             ClipRRect(
               borderRadius: BorderRadius.circular(50),
-              child: Image.asset(doctorImagePath, height: 100),
+              child: Image.asset(
+                doctorImagePath,
+                height: 80,
+                width: 80,
+                fit: BoxFit.cover,
+              ),
             ),
-            SizedBox(height: 10),
-            //rating out of 5
+            const SizedBox(height: 8),
+            // rating
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.star, color: Colors.yellow[600]),
-                Text(rating, style: AppTextStyles.link(color: Colors.black)),
+                Icon(Icons.star, color: Colors.yellow[700], size: 16),
+                const SizedBox(width: 4),
+                Text(rating, style: AppTextStyles.body(color: Colors.black)),
               ],
             ),
-
-            SizedBox(height: 10),
-
-            //doctor name
+            const SizedBox(height: 8),
+            // nome
             Text(
               doctorName,
               style: AppTextStyles.subtitle(color: Colors.black),
+              textAlign: TextAlign.center,
             ),
-
-            //doctor title
+            const SizedBox(height: 4),
+            // professione
             Text(
-              '$doctorProfession 25 y.e.',
-              style: AppTextStyles.body(color: Colors.black),
+              doctorProfession,
+              style: AppTextStyles.body(color: Colors.grey[700]!),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

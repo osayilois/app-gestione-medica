@@ -27,6 +27,16 @@ class AppTextStyles {
     color: color,
   );
 
+  // font per titolo grande, poppins
+  static TextStyle bigtitle({Color color = Colors.black}) =>
+      GoogleFonts.poppins(
+        textStyle: TextStyle(
+          fontSize: 36,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      );
+
   // font per sottotitoli (outfit)
   static TextStyle subtitle({Color color = Colors.black}) => GoogleFonts.outfit(
     textStyle: TextStyle(

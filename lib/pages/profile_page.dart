@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:medicare_app/theme/text_styles.dart';
+import 'medical_card_page.dart'; // importa la pagina
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -48,7 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final data = doc.data() ?? {};
 
     setState(() {
-      // general info
+      // --- general ---
       codiceFiscale = data['codiceFiscale'];
       telefono = data['telefono'];
       medicoBase = data['medicoBase'];
@@ -56,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
       _telefonoController.text = telefono ?? '';
       _medicoBaseController.text = medicoBase ?? '';
 
-      // medicalCard
+      // --- medicalCard ---
       final mc = data['medicalCard'] as Map<String, dynamic>?;
       if (mc != null) {
         birthDate =
@@ -70,9 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _saveGeneralInfo() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (user == null) return;
-
+    if (!_formKey.currentState!.validate() || user == null) return;
     await firestore.collection('users').doc(user!.uid).set({
       'codiceFiscale': _codiceFiscaleController.text.trim(),
       'telefono': _telefonoController.text.trim(),
@@ -91,13 +90,23 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  void _openMedicalCard() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const MedicalCardPage()),
+    ).then((_) {
+      // ricarica dopo modifica
+      _loadAllData();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final nomeCompleto = user?.displayName ?? '';
     final email = user?.email ?? '';
-    final nome = nomeCompleto.split(' ').first;
-    final cognome =
-        nomeCompleto.split(' ').length > 1 ? nomeCompleto.split(' ')[1] : '';
+    final parts = nomeCompleto.split(' ');
+    final nome = parts.isNotEmpty ? parts.first : '';
+    final cognome = parts.length > 1 ? parts.sublist(1).join(' ') : '';
 
     return Scaffold(
       appBar: AppBar(
@@ -154,7 +163,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     buildInfoRow('Email', email),
                     const SizedBox(height: 12),
 
-                    // campi editabili
                     if (!isEditing) ...[
                       if (codiceFiscale != null)
                         buildInfoRow('Fiscal Code', codiceFiscale!),
@@ -181,23 +189,24 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-            if (isEditing) ...[
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _saveGeneralInfo,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 12,
+            if (isEditing)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: ElevatedButton(
+                  onPressed: _saveGeneralInfo,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 12,
+                    ),
+                  ),
+                  child: Text(
+                    'Save',
+                    style: AppTextStyles.buttons(color: Colors.white),
                   ),
                 ),
-                child: Text(
-                  'Save',
-                  style: AppTextStyles.buttons(color: Colors.white),
-                ),
               ),
-            ],
 
             const SizedBox(height: 30),
 
@@ -221,26 +230,41 @@ class _ProfilePageState extends State<ProfilePage> {
                   if (birthDate != null)
                     buildInfoRow(
                       'Date of Birth',
-                      '${birthDate!.day.toString().padLeft(2, '0')}/${birthDate!.month.toString().padLeft(2, '0')}/${birthDate!.year}',
+                      '${birthDate!.day.toString().padLeft(2, '0')}/'
+                          '${birthDate!.month.toString().padLeft(2, '0')}/'
+                          '${birthDate!.year}',
                     ),
                   if (bloodType != null) buildInfoRow('Blood Type', bloodType!),
                   if (allergies != null) buildInfoRow('Allergies', allergies!),
                   if (conditions != null)
                     buildInfoRow('Conditions', conditions!),
                   if (therapy != null) buildInfoRow('Therapy', therapy!),
-                  if (birthDate == null &&
-                      bloodType == null &&
-                      allergies == null &&
-                      conditions == null &&
-                      therapy == null)
-                    Text(
-                      'No medical information yet.',
-                      style: AppTextStyles.body(color: Colors.grey[600]!),
+
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _openMedicalCard,
+                      icon: Icon(Icons.edit, color: Colors.white),
+                      label: Text(
+                        birthDate != null
+                            ? 'Edit Medical Card'
+                            : 'Complete Medical Card',
+                        style: AppTextStyles.buttons(color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple[300],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
                     ),
+                  ),
                 ],
               ),
             ),
-          ], //children
+          ],
         ),
       ),
     );
