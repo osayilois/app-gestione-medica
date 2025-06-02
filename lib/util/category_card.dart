@@ -1,3 +1,5 @@
+// lib/util/category_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 
@@ -5,44 +7,52 @@ class CategoryCard extends StatelessWidget {
   final IconData iconData;
   final String categoryName;
   final Color backgroundColor;
+  final bool isSelected;
 
   const CategoryCard({
     super.key,
     required this.iconData,
     required this.categoryName,
     required this.backgroundColor,
+    this.isSelected = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      // riduce lo spazio orizzontale tra le card
-      padding: const EdgeInsets.only(right: 12.0),
+      padding: const EdgeInsets.only(left: 15.0), // leggermente più vicine
       child: Container(
-        // larghezza fissa per avvicinarle a un rapporto “4x4”
-        width: 120,
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(16),
+          color:
+              isSelected ? backgroundColor.withOpacity(0.7) : backgroundColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(
+                color: backgroundColor.withOpacity(0.4),
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // cerchio bianco con icona colorata come lo sfondo
+            // Cerchio bianco con icona colorata
             Container(
               decoration: const BoxDecoration(
-                shape: BoxShape.circle,
                 color: Colors.white,
+                shape: BoxShape.circle,
               ),
-              padding: const EdgeInsets.all(8),
-              child: Icon(iconData, size: 28, color: backgroundColor),
+              padding: const EdgeInsets.all(10),
+              child: Icon(iconData, size: 32, color: backgroundColor),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               categoryName,
-              textAlign: TextAlign.center,
               style: AppTextStyles.buttons(color: Colors.white),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

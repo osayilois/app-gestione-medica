@@ -27,11 +27,7 @@ class HomePage extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-
-        if (!snapshot.hasData) {
-          return const LoginPage();
-        }
-
+        if (!snapshot.hasData) return const LoginPage();
         return const _HomeContent();
       },
     );
@@ -54,9 +50,9 @@ class _HomeContentState extends State<_HomeContent> {
       'rating': '4.9',
     },
     {
-      'name': 'Dr. Jeremy Alford',
+      'name': 'Dr. Michael Uzor',
       'specialty': 'Dentist',
-      'image': 'lib/images/jeremy-alford-O13B7suRG4A-unsplash.jpg',
+      'image': 'lib/images/dr_mike.jpg',
       'rating': '4.6',
     },
     {
@@ -65,14 +61,37 @@ class _HomeContentState extends State<_HomeContent> {
       'image': 'lib/images/usman-yousaf-pTrhfmj2jDA-unsplash.jpg',
       'rating': '5.0',
     },
+    {
+      'name': 'Dr. Rosa Fernandez',
+      'specialty': 'Cardiologist',
+      'image': 'lib/images/dr_rosa.jpg',
+      'rating': '4.8',
+    },
+    {
+      'name': 'Dr. Elena Petrova',
+      'specialty': 'Paediatrician',
+      'image': 'lib/images/dr_elena.jpg',
+      'rating': '4.7',
+    },
+    {
+      'name': 'Dr. Michael Austin',
+      'specialty': 'Dermatologist',
+      'image': 'lib/images/dr_austin.jpg',
+      'rating': '4.5',
+    },
   ];
 
   final TextEditingController _searchController = TextEditingController();
   String selectedSpecialty = 'All';
   List<Map<String, String>> filteredDoctors = [];
 
-  // Categorie
+  // Categorie con icone e colori
   final List<Map<String, dynamic>> categories = [
+    {
+      'name': 'All',
+      'iconData': Icons.grid_view,
+      'color': Colors.deepPurple.shade300,
+    },
     {
       'name': 'Cardiologist',
       'iconData': MdiIcons.heartPulse,
@@ -99,14 +118,9 @@ class _HomeContentState extends State<_HomeContent> {
       'color': Colors.green.shade300,
     },
     {
-      'name': 'Neurologist',
-      'iconData': MdiIcons.brain,
+      'name': 'Surgeon',
+      'iconData': MdiIcons.stethoscope,
       'color': Colors.purple.shade300,
-    },
-    {
-      'name': 'Psychiatrist',
-      'iconData': MdiIcons.emoticonHappy,
-      'color': Colors.pink.shade300,
     },
     {
       'name': 'Dermatologist',
@@ -115,7 +129,7 @@ class _HomeContentState extends State<_HomeContent> {
     },
   ];
 
-  bool _hasMedical = false; // se ha già compilato medicalCard
+  bool _hasMedical = false;
   final _firestore = FirebaseFirestore.instance;
 
   @override
@@ -152,10 +166,11 @@ class _HomeContentState extends State<_HomeContent> {
     });
   }
 
-  void _onSpecialtyChanged(String? newSpecialty) {
+  void _onCategoryTap(String categoryName) {
     setState(() {
-      selectedSpecialty = newSpecialty ?? 'All';
+      selectedSpecialty = categoryName;
     });
+    // Applica filtro anche sul testo di ricerca corrente
     _filterDoctors(_searchController.text);
   }
 
@@ -171,7 +186,6 @@ class _HomeContentState extends State<_HomeContent> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ANIMAZIONE LOTTIE
                 SizedBox(
                   height: 120,
                   child: Lottie.asset(
@@ -180,14 +194,12 @@ class _HomeContentState extends State<_HomeContent> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                // MESSAGGIO CENTRATO
                 Text(
                   'Are you sure you want to log out?',
                   textAlign: TextAlign.center,
                   style: AppTextStyles.title2(color: Colors.black),
                 ),
                 const SizedBox(height: 20),
-                // BOTTONE LOGOUT
                 SizedBox(
                   width: 150,
                   child: FilledButton(
@@ -204,7 +216,6 @@ class _HomeContentState extends State<_HomeContent> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                // BOTTONE CANCEL SENZA RIQUADRO
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
                   child: Text(
@@ -260,7 +271,6 @@ class _HomeContentState extends State<_HomeContent> {
                           ),
                         ],
                       ),
-                      // MENU -> Profile, Prescriptions, Appointments, Logout
                       GestureDetector(
                         onTapDown: (details) {
                           final pos = details.globalPosition;
@@ -529,54 +539,43 @@ class _HomeContentState extends State<_HomeContent> {
 
                 const SizedBox(height: 25),
 
-                // mini TITOLO "Specialists"
+                // MINI TITOLO "Specialists"
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'Specialists',
-                      style: AppTextStyles.title2(color: Colors.deepPurple),
+                      style: AppTextStyles.buttons(color: Colors.deepPurple),
                     ),
                   ),
                 ),
 
                 const SizedBox(height: 12),
 
-                // CATEGORIE SCORREVOLI ORIZZONTALI (4x4 più compatte)
+                // CATEGORIE SCORREVOLI ORIZZONTALI (4×4 leggermente più grandi)
                 SizedBox(
-                  height: 120,
+                  height: 150, // aumentata l'altezza
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     itemCount: categories.length,
                     itemBuilder: (context, index) {
                       final cat = categories[index];
-                      return CategoryCard(
-                        iconData: cat['iconData'],
-                        categoryName: cat['name'],
-                        backgroundColor: cat['color'],
+                      final isSelected = selectedSpecialty == cat['name'];
+                      return GestureDetector(
+                        onTap: () => _onCategoryTap(cat['name']),
+                        child: SizedBox(
+                          width: 140, // larghezza minima fissa
+                          child: CategoryCard(
+                            iconData: cat['iconData'],
+                            categoryName: cat['name'],
+                            backgroundColor: cat['color'],
+                            isSelected: isSelected,
+                          ),
+                        ),
                       );
                     },
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                // SPECIALTY DROPDOWN
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: DropdownButton<String>(
-                    value: selectedSpecialty,
-                    isExpanded: true,
-                    style: AppTextStyles.subtitle(color: Colors.black),
-                    items:
-                        ['All', 'Therapist', 'Dentist', 'Surgeon']
-                            .map(
-                              (s) => DropdownMenuItem(value: s, child: Text(s)),
-                            )
-                            .toList(),
-                    onChanged: _onSpecialtyChanged,
                   ),
                 ),
 
@@ -590,7 +589,7 @@ class _HomeContentState extends State<_HomeContent> {
                     children: [
                       Text(
                         'Doctor list',
-                        style: AppTextStyles.title2(color: Colors.deepPurple),
+                        style: AppTextStyles.buttons(color: Colors.deepPurple),
                       ),
                     ],
                   ),
@@ -605,7 +604,7 @@ class _HomeContentState extends State<_HomeContent> {
                     itemCount: filteredDoctors.length,
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     itemBuilder: (context, i) {
-                      final doc = filteredDoctors[i];
+                      final docItem = filteredDoctors[i];
                       return Padding(
                         padding: const EdgeInsets.only(right: 15),
                         child: GestureDetector(
@@ -615,16 +614,16 @@ class _HomeContentState extends State<_HomeContent> {
                               MaterialPageRoute(
                                 builder:
                                     (_) => AppointmentPage(
-                                      doctorName: doc['name']!,
+                                      doctorName: docItem['name']!,
                                     ),
                               ),
                             );
                           },
                           child: DoctorCard(
-                            doctorImagePath: doc['image']!,
-                            rating: doc['rating']!,
-                            doctorName: doc['name']!,
-                            doctorProfession: doc['specialty']!,
+                            doctorImagePath: docItem['image']!,
+                            rating: docItem['rating']!,
+                            doctorName: docItem['name']!,
+                            doctorProfession: docItem['specialty']!,
                           ),
                         ),
                       );

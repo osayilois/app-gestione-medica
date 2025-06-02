@@ -62,7 +62,7 @@ class DoctorCard extends StatelessWidget {
             // nome
             Text(
               doctorName,
-              style: AppTextStyles.subtitle(color: Colors.black),
+              style: AppTextStyles.buttons(color: Colors.black),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 4),
