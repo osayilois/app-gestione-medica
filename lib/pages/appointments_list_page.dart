@@ -1,9 +1,8 @@
-// lib/pages/appointments_list_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:medicare_app/theme/text_styles.dart';
 
 class AppointmentsListPage extends StatelessWidget {
   const AppointmentsListPage({super.key});
@@ -18,7 +17,11 @@ class AppointmentsListPage extends StatelessWidget {
         .orderBy('startTime', descending: true);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('I tuoi appuntamenti')),
+      // UN SOLO TITLO: “Your appointments”
+      appBar: AppBar(
+        title: const Text('Your appointments'),
+        backgroundColor: Colors.deepPurple[300],
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: coll.snapshots(),
         builder: (context, snap) {
@@ -27,7 +30,12 @@ class AppointmentsListPage extends StatelessWidget {
           }
           final docs = snap.data?.docs ?? [];
           if (docs.isEmpty) {
-            return const Center(child: Text('Nessun appuntamento prenotato.'));
+            return Center(
+              child: Text(
+                'Nessun appuntamento prenotato.',
+                style: AppTextStyles.body(color: Colors.black),
+              ),
+            );
           }
           return ListView.builder(
             itemCount: docs.length,
@@ -45,7 +53,6 @@ class AppointmentsListPage extends StatelessWidget {
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
-                    // Rimuovi dal DB
                     docs[i].reference.delete();
                   },
                 ),

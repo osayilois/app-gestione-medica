@@ -1,5 +1,3 @@
-// lib/pages/home_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:medicare_app/theme/text_styles.dart';
@@ -170,7 +168,6 @@ class _HomeContentState extends State<_HomeContent> {
     setState(() {
       selectedSpecialty = categoryName;
     });
-    // Applica filtro anche sul testo di ricerca corrente
     _filterDoctors(_searchController.text);
   }
 
@@ -257,143 +254,158 @@ class _HomeContentState extends State<_HomeContent> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // Saluto + nome utente
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Hello,',
+                            'Hello, ${getUserDisplayName()}!',
                             style: AppTextStyles.title2(color: Colors.black),
                           ),
                           const SizedBox(height: 8),
-                          Text(
-                            getUserDisplayName(),
-                            style: AppTextStyles.title1(color: Colors.black),
-                          ),
                         ],
                       ),
-                      GestureDetector(
-                        onTapDown: (details) {
-                          final pos = details.globalPosition;
-                          showMenu<String>(
-                            context: context,
-                            position: RelativeRect.fromLTRB(
-                              pos.dx,
-                              pos.dy + 10,
-                              pos.dx,
-                              0,
+
+                      // Icone in alto a destra: (1) menu profilo, (2) pulsante logout
+                      Row(
+                        children: [
+                          // 1) menu a tendina “Profilo”
+                          GestureDetector(
+                            onTapDown: (details) {
+                              final pos = details.globalPosition;
+                              showMenu<String>(
+                                context: context,
+                                position: RelativeRect.fromLTRB(
+                                  pos.dx,
+                                  pos.dy + 10,
+                                  pos.dx,
+                                  0,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                color: Colors.white,
+                                elevation: 8,
+                                items: [
+                                  PopupMenuItem(
+                                    value: 'profile',
+                                    child: ListTile(
+                                      leading: const Icon(Icons.person_outline),
+                                      title: Text(
+                                        'Profile',
+                                        style: AppTextStyles.body(
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'prescriptions',
+                                    child: ListTile(
+                                      leading: const Icon(
+                                        Icons.medication_outlined,
+                                      ),
+                                      title: Text(
+                                        'Prescriptions',
+                                        style: AppTextStyles.body(
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'appointments',
+                                    child: ListTile(
+                                      leading: const Icon(
+                                        Icons.event_note_outlined,
+                                      ),
+                                      title: Text(
+                                        'Appointments',
+                                        style: AppTextStyles.body(
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const PopupMenuDivider(),
+                                  PopupMenuItem(
+                                    value: 'logout',
+                                    child: ListTile(
+                                      leading: const Icon(
+                                        Icons.logout,
+                                        color: Colors.red,
+                                      ),
+                                      title: Text(
+                                        'Logout',
+                                        style: AppTextStyles.body(
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ).then((value) {
+                                switch (value) {
+                                  case 'profile':
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const ProfilePage(),
+                                      ),
+                                    );
+                                    break;
+                                  case 'prescriptions':
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Sezione "Ricette" in arrivo!',
+                                          style: AppTextStyles.body(
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                    break;
+                                  case 'appointments':
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (_) => const AppointmentsListPage(),
+                                      ),
+                                    );
+                                    break;
+                                  case 'logout':
+                                    _confirmLogout();
+                                    break;
+                                }
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.deepPurple[100],
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(Icons.person),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            color: Colors.white,
-                            elevation: 8,
-                            items: [
-                              PopupMenuItem(
-                                value: 'profile',
-                                child: ListTile(
-                                  leading: const Icon(Icons.person_outline),
-                                  title: Text(
-                                    'Profile',
-                                    style: AppTextStyles.subtitle(
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: 'prescriptions',
-                                child: ListTile(
-                                  leading: const Icon(
-                                    Icons.medication_outlined,
-                                  ),
-                                  title: Text(
-                                    'Prescriptions',
-                                    style: AppTextStyles.subtitle(
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: 'appointments',
-                                child: ListTile(
-                                  leading: const Icon(
-                                    Icons.event_note_outlined,
-                                  ),
-                                  title: Text(
-                                    'Appointments',
-                                    style: AppTextStyles.subtitle(
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const PopupMenuDivider(),
-                              PopupMenuItem(
-                                value: 'logout',
-                                child: ListTile(
-                                  leading: const Icon(
-                                    Icons.logout,
-                                    color: Colors.red,
-                                  ),
-                                  title: Text(
-                                    'Logout',
-                                    style: AppTextStyles.subtitle(
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ).then((value) {
-                            switch (value) {
-                              case 'profile':
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const ProfilePage(),
-                                  ),
-                                );
-                                break;
-                              case 'prescriptions':
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Sezione "Ricette" in arrivo!',
-                                    ),
-                                  ),
-                                );
-                                break;
-                              case 'appointments':
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (_) => const AppointmentsListPage(),
-                                  ),
-                                );
-                                break;
-                              case 'logout':
-                                _confirmLogout();
-                                break;
-                            }
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.deepPurple[100],
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
                           ),
-                          child: const Icon(Icons.person),
-                        ),
+
+                          const SizedBox(width: 12),
+
+                          // 2) pulsante diretto di Logout
+                          IconButton(
+                            icon: const Icon(Icons.logout, color: Colors.red),
+                            onPressed: _confirmLogout,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -485,7 +497,7 @@ class _HomeContentState extends State<_HomeContent> {
                           style: AppTextStyles.bigtitle(color: Colors.black),
                         ),
                       ] else ...[
-                        // utente già compilato -> titolo in alto
+                        // utente già compilato → titolo in alto
                         Text(
                           'Find your doctor',
                           style: AppTextStyles.bigtitle(color: Colors.black),
@@ -498,7 +510,7 @@ class _HomeContentState extends State<_HomeContent> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         decoration: BoxDecoration(
-                          color: Colors.grey[200], // grigio chiaro
+                          color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: Row(
@@ -516,9 +528,8 @@ class _HomeContentState extends State<_HomeContent> {
                                 ),
                               ),
                             ),
-                            // il bottone rotondo lilla
                             Material(
-                              color: Colors.deepPurple[300], // tema lilla
+                              color: Colors.deepPurple[300],
                               shape: const CircleBorder(),
                               child: IconButton(
                                 icon: const Icon(
@@ -553,9 +564,9 @@ class _HomeContentState extends State<_HomeContent> {
 
                 const SizedBox(height: 12),
 
-                // CATEGORIE SCORREVOLI ORIZZONTALI (4×4 leggermente più grandi)
+                // CATEGORIE SCORREVOLI ORIZZONTALMENTE (4×4 leggermente più grandi)
                 SizedBox(
-                  height: 150, // aumentata l'altezza
+                  height: 150,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
@@ -566,7 +577,7 @@ class _HomeContentState extends State<_HomeContent> {
                       return GestureDetector(
                         onTap: () => _onCategoryTap(cat['name']),
                         child: SizedBox(
-                          width: 140, // larghezza minima fissa
+                          width: 140,
                           child: CategoryCard(
                             iconData: cat['iconData'],
                             categoryName: cat['name'],

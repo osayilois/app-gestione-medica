@@ -79,7 +79,12 @@ class _ProfilePageState extends State<ProfilePage> {
     }, SetOptions(merge: true));
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Information saved successfully!')),
+      SnackBar(
+        content: Text(
+          'Information saved successfully!',
+          style: AppTextStyles.body(color: Colors.black),
+        ),
+      ),
     );
 
     setState(() {
