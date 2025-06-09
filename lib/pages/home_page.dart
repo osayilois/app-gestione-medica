@@ -11,6 +11,14 @@ import 'package:medicare_app/pages/profile_page.dart';
 import 'package:medicare_app/pages/appointments_list_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:medicare_app/pages/specialist_page.dart';
+
+String getGreeting() {
+  final hour = DateTime.now().hour;
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+}
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -226,6 +234,12 @@ class _HomeContentState extends State<_HomeContent> {
       'image': 'lib/images/dr_austin.jpg',
       'rating': '4.5',
     },
+    {
+      'name': 'Dr. Victor Singh',
+      'specialty': 'Gynecologist',
+      'image': 'lib/images/dr_victor.jpg',
+      'rating': '4.4',
+    },
   ];
 
   final TextEditingController _searchController = TextEditingController();
@@ -274,6 +288,11 @@ class _HomeContentState extends State<_HomeContent> {
       'iconData': MdiIcons.faceManShimmer,
       'color': Colors.brown.shade300,
     },
+    {
+      'name': 'Gynecologist',
+      'iconData': MdiIcons.humanPregnant,
+      'color': Colors.pink.shade300,
+    },
   ];
 
   bool _hasMedical = false;
@@ -313,12 +332,25 @@ class _HomeContentState extends State<_HomeContent> {
     });
   }
 
-  void _onCategoryTap(String categoryName) {
+  /*void _onCategoryTap(String categoryName) {
     setState(() {
       selectedSpecialty = categoryName;
     });
     _filterDoctors(_searchController.text);
   }
+
+  void _onCategoryTap(String categoryName) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (_) => SpecialistPage(
+              specialty: categoryName,
+              allDoctors: doctors, // la lista completa dal tuo stato
+            ),
+      ),
+    );
+  }*/
 
   Future<void> _confirmLogout() async {
     final shouldLogout = await showDialog<bool>(
@@ -409,8 +441,10 @@ class _HomeContentState extends State<_HomeContent> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Hello, ${getUserDisplayName()}!',
-                            style: AppTextStyles.title2(color: Colors.black),
+                            '${getGreeting()}, \n${getUserDisplayName()}!',
+                            style: AppTextStyles.title2(
+                              color: Colors.grey.shade700,
+                            ),
                           ),
                           const SizedBox(height: 8),
                         ],
@@ -723,16 +757,26 @@ class _HomeContentState extends State<_HomeContent> {
                     itemCount: categories.length,
                     itemBuilder: (context, index) {
                       final cat = categories[index];
-                      final isSelected = selectedSpecialty == cat['name'];
                       return GestureDetector(
-                        onTap: () => _onCategoryTap(cat['name']),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => SpecialistPage(
+                                    specialty: cat['name'],
+                                    doctors: doctors,
+                                  ),
+                            ),
+                          );
+                        },
                         child: SizedBox(
                           width: 140,
                           child: CategoryCard(
                             iconData: cat['iconData'],
                             categoryName: cat['name'],
                             backgroundColor: cat['color'],
-                            isSelected: isSelected,
+                            isSelected: selectedSpecialty == cat['name'],
                           ),
                         ),
                       );
@@ -743,7 +787,7 @@ class _HomeContentState extends State<_HomeContent> {
                 const SizedBox(height: 25),
 
                 // DOCTOR LIST
-                Padding(
+                /*Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -790,7 +834,7 @@ class _HomeContentState extends State<_HomeContent> {
                       );
                     },
                   ),
-                ),
+                ),*/
               ],
             ),
           ),
