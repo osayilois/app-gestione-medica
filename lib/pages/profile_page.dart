@@ -107,6 +107,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final cognome = parts.length > 1 ? parts.sublist(1).join(' ') : '';
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
         child: Column(

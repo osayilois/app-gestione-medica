@@ -70,6 +70,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(title: Text('Appointment with ${widget.doctorName}')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

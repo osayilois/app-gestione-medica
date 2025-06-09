@@ -22,6 +22,7 @@ class AppointmentsListPage extends StatelessWidget {
         title: const Text('Your appointments'),
         backgroundColor: Colors.deepPurple[300],
       ),*/
+      backgroundColor: Colors.white,
       body: StreamBuilder<QuerySnapshot>(
         stream: coll.snapshots(),
         builder: (context, snap) {
