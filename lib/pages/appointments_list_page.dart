@@ -18,10 +18,10 @@ class AppointmentsListPage extends StatelessWidget {
 
     return Scaffold(
       // UN SOLO TITLO: “Your appointments”
-      appBar: AppBar(
+      /*appBar: AppBar(
         title: const Text('Your appointments'),
         backgroundColor: Colors.deepPurple[300],
-      ),
+      ),*/
       body: StreamBuilder<QuerySnapshot>(
         stream: coll.snapshots(),
         builder: (context, snap) {

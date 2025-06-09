@@ -19,6 +19,153 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (!snap.hasData) return const LoginPage();
+        return const MainScreen();
+      },
+    );
+  }
+}
+
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _currentIndex = 0;
+
+  // Qui gli “stack” delle 4 pagine
+  static const List<Widget> _pages = <Widget>[
+    _HomeContent(),
+    AppointmentsListPage(),
+    // placeholder per “Prescriptions” finché non la crei
+    Center(child: Text('Prescriptions coming soon')),
+    ProfilePage(),
+  ];
+
+  void _onTap(int idx) {
+    setState(() => _currentIndex = idx);
+  }
+
+  Future<void> _confirmLogout() async {
+    final should = await showDialog<bool>(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 120,
+                  child: Lottie.asset(
+                    'assets/animations/logout.json',
+                    repeat: false,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Are you sure you want to log out?',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.title2(color: Colors.black),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 150,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.deepPurple[300],
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      textStyle: AppTextStyles.buttons(),
+                    ),
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Logout'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(
+                    'Cancel',
+                    style: AppTextStyles.buttons(
+                      color: Colors.deepPurple[300]!,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+    );
+    if (should == true) await FirebaseAuth.instance.signOut();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Titoli e colori per la BottomBar
+    const labels = ['Home', 'Appointments', 'Prescriptions', 'Profile'];
+    const icons = [
+      Icons.home_outlined,
+      Icons.event_note_outlined,
+      Icons.medical_services_outlined,
+      Icons.person_outline,
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          labels[_currentIndex],
+          style: AppTextStyles.title2(color: Colors.grey[800]!),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.grey),
+            onPressed: _confirmLogout,
+          ),
+        ],
+      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _onTap,
+        type: BottomNavigationBarType.fixed,
+        showUnselectedLabels: false,
+        showSelectedLabels: true,
+        selectedItemColor: Colors.deepPurple[300],
+        unselectedItemColor: Colors.grey[500],
+        items: List.generate(4, (i) {
+          return BottomNavigationBarItem(
+            icon: Icon(icons[i]),
+            label: labels[i],
+          );
+        }),
+      ),
+    );
+  }
+}
+
+/*class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -30,7 +177,7 @@ class HomePage extends StatelessWidget {
       },
     );
   }
-}
+}*/
 
 class _HomeContent extends StatefulWidget {
   const _HomeContent({super.key});
@@ -267,7 +414,7 @@ class _HomeContentState extends State<_HomeContent> {
                       ),
 
                       // Icone in alto a destra: (1) menu profilo, (2) pulsante logout
-                      Row(
+                      /*Row(
                         children: [
                           // 1) menu a tendina “Profilo”
                           GestureDetector(
@@ -406,7 +553,7 @@ class _HomeContentState extends State<_HomeContent> {
                             onPressed: _confirmLogout,
                           ),
                         ],
-                      ),
+                      ),*/
                     ],
                   ),
                 ),

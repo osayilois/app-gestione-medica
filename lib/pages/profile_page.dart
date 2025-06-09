@@ -8,7 +8,6 @@ import 'medical_card_page.dart'; // importa la pagina
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
-
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
@@ -17,17 +16,14 @@ class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
   bool isEditing = false;
 
-  // controllers per i campi editabili
   final _codiceFiscaleController = TextEditingController();
   final _telefonoController = TextEditingController();
   final _medicoBaseController = TextEditingController();
 
-  // dati per la view non-editabile
   String? codiceFiscale;
   String? telefono;
   String? medicoBase;
 
-  // dati medicalCard
   DateTime? birthDate;
   String? bloodType;
   String? allergies;
@@ -49,7 +45,6 @@ class _ProfilePageState extends State<ProfilePage> {
     final data = doc.data() ?? {};
 
     setState(() {
-      // --- general ---
       codiceFiscale = data['codiceFiscale'];
       telefono = data['telefono'];
       medicoBase = data['medicoBase'];
@@ -57,7 +52,6 @@ class _ProfilePageState extends State<ProfilePage> {
       _telefonoController.text = telefono ?? '';
       _medicoBaseController.text = medicoBase ?? '';
 
-      // --- medicalCard ---
       final mc = data['medicalCard'] as Map<String, dynamic>?;
       if (mc != null) {
         birthDate =
@@ -82,7 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
       SnackBar(
         content: Text(
           'Information saved successfully!',
-          style: AppTextStyles.body(color: Colors.black),
+          style: AppTextStyles.body(color: Colors.white),
         ),
       ),
     );
@@ -100,7 +94,6 @@ class _ProfilePageState extends State<ProfilePage> {
       context,
       MaterialPageRoute(builder: (_) => const MedicalCardPage()),
     ).then((_) {
-      // ricarica dopo modifica
       _loadAllData();
     });
   }
@@ -114,24 +107,6 @@ class _ProfilePageState extends State<ProfilePage> {
     final cognome = parts.length > 1 ? parts.sublist(1).join(' ') : '';
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Profile',
-          style: AppTextStyles.title2(color: Colors.deepPurple),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              isEditing ? Icons.close : Icons.edit,
-              color: Colors.deepPurple,
-            ),
-            onPressed: () => setState(() => isEditing = !isEditing),
-            tooltip: isEditing ? 'Cancel' : 'Edit',
-          ),
-        ],
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
         child: Column(
@@ -152,6 +127,8 @@ class _ProfilePageState extends State<ProfilePage> {
               ).copyWith(fontSize: 16),
             ),
             const SizedBox(height: 8),
+
+            // Riquadro lilla con dentro form + edit/save
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -161,7 +138,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     buildInfoRow('Name', nome),
                     buildInfoRow('Surname', cognome),
@@ -190,28 +167,45 @@ class _ProfilePageState extends State<ProfilePage> {
                         _medicoBaseController,
                       ),
                     ],
+
+                    const SizedBox(height: 16),
+
+                    // Qui dentro il pulsante edit / save
+                    if (!isEditing)
+                      ElevatedButton.icon(
+                        onPressed: () => setState(() => isEditing = true),
+                        icon: const Icon(Icons.edit, color: Colors.white),
+                        label: Text(
+                          'Edit General Information',
+                          style: AppTextStyles.buttons(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple[300],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      )
+                    else
+                      ElevatedButton(
+                        onPressed: _saveGeneralInfo,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          'Save',
+                          style: AppTextStyles.buttons(color: Colors.white),
+                        ),
+                      ),
                   ],
                 ),
               ),
             ),
-            if (isEditing)
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: ElevatedButton(
-                  onPressed: _saveGeneralInfo,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 40,
-                      vertical: 12,
-                    ),
-                  ),
-                  child: Text(
-                    'Save',
-                    style: AppTextStyles.buttons(color: Colors.white),
-                  ),
-                ),
-              ),
 
             const SizedBox(height: 30),
 
@@ -223,6 +217,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ).copyWith(fontSize: 16),
             ),
             const SizedBox(height: 8),
+
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -230,7 +225,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (birthDate != null)
                     buildInfoRow(
@@ -246,24 +241,21 @@ class _ProfilePageState extends State<ProfilePage> {
                   if (therapy != null) buildInfoRow('Therapy', therapy!),
 
                   const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _openMedicalCard,
-                      icon: Icon(Icons.edit, color: Colors.white),
-                      label: Text(
-                        birthDate != null
-                            ? 'Edit Medical Card'
-                            : 'Complete Medical Card',
-                        style: AppTextStyles.buttons(color: Colors.white),
+                  ElevatedButton.icon(
+                    onPressed: _openMedicalCard,
+                    icon: const Icon(Icons.edit, color: Colors.white),
+                    label: Text(
+                      birthDate != null
+                          ? 'Edit Medical Card'
+                          : 'Complete Medical Card',
+                      style: AppTextStyles.buttons(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple[300],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple[300],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                   ),
                 ],
