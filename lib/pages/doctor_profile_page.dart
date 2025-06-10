@@ -33,36 +33,44 @@ class DoctorProfilePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
         title: Text(
           name,
           style: AppTextStyles.title2(color: Colors.grey.shade800),
         ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.grey.shade800),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Immagine rotonda del dottore
-            ClipRRect(
-              borderRadius: BorderRadius.circular(75),
-              child: Image.asset(
-                imagePath,
-                height: 150,
-                width: 150,
-                fit: BoxFit.cover,
+            // Immagine rotonda, leggermente più grande
+            Center(
+              child: CircleAvatar(
+                radius: 80, // aumenta se vuoi ancora più grande
+                backgroundColor: Colors.grey[200],
+                backgroundImage: AssetImage(imagePath),
               ),
             ),
             const SizedBox(height: 16),
-            Text(name, style: AppTextStyles.title1(color: Colors.black)),
+            // Nome centrato
+            Text(
+              name,
+              style: AppTextStyles.title1(color: Colors.black),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            // Specializzazione centrata
             Text(
               specialty,
               style: AppTextStyles.subtitle(color: Colors.grey[700]!),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            // Rating centrato
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -73,7 +81,7 @@ class DoctorProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Bio se presente
+            // Bio centrata (se presente)
             if (bio.isNotEmpty) ...[
               Text(
                 bio,
@@ -83,63 +91,21 @@ class DoctorProfilePage extends StatelessWidget {
               const SizedBox(height: 24),
             ],
 
-            // Indirizzo se presente
+            // Informazioni aggiuntive in righe con icona a sinistra
             if (address.isNotEmpty) ...[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.location_on, color: Colors.deepPurple),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      address,
-                      style: AppTextStyles.body(color: Colors.black),
-                    ),
-                  ),
-                ],
-              ),
+              _infoRow(Icons.location_on, address),
               const SizedBox(height: 12),
             ],
-
-            // Telefono se presente
             if (phone.isNotEmpty) ...[
-              Row(
-                children: [
-                  Icon(Icons.phone, color: Colors.deepPurple),
-                  const SizedBox(width: 8),
-                  Text(phone, style: AppTextStyles.body(color: Colors.black)),
-                ],
-              ),
+              _infoRow(Icons.phone, phone),
               const SizedBox(height: 12),
             ],
-
-            // Email se presente
             if (email.isNotEmpty) ...[
-              Row(
-                children: [
-                  Icon(Icons.email, color: Colors.deepPurple),
-                  const SizedBox(width: 8),
-                  Text(email, style: AppTextStyles.body(color: Colors.black)),
-                ],
-              ),
+              _infoRow(Icons.email, email),
               const SizedBox(height: 12),
             ],
-
-            // Orari se presenti
             if (hours.isNotEmpty) ...[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.access_time, color: Colors.deepPurple),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      hours,
-                      style: AppTextStyles.body(color: Colors.black),
-                    ),
-                  ),
-                ],
-              ),
+              _infoRow(Icons.access_time, hours),
               const SizedBox(height: 24),
             ],
 
@@ -159,7 +125,7 @@ class DoctorProfilePage extends StatelessWidget {
                   backgroundColor: Colors.deepPurple[300],
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(35),
                   ),
                 ),
                 child: Text(
@@ -171,6 +137,20 @@ class DoctorProfilePage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // Widget di supporto per riga info con icona e testo
+  Widget _infoRow(IconData iconData, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(iconData, color: Colors.deepPurple),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(text, style: AppTextStyles.body(color: Colors.black)),
+        ),
+      ],
     );
   }
 }

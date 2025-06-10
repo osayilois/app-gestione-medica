@@ -169,26 +169,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-/*class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        if (!snapshot.hasData) return const LoginPage();
-        return const _HomeContent();
-      },
-    );
-  }
-}*/
-
 class _HomeContent extends StatefulWidget {
   const _HomeContent({super.key});
 
@@ -199,81 +179,81 @@ class _HomeContent extends StatefulWidget {
 class _HomeContentState extends State<_HomeContent> {
   final List<Map<String, String>> doctors = [
     {
-      'name': 'Dr. Amanda Chavez',
+      'name': 'Dr. Amanda Chaves',
       'specialty': 'Therapist',
       'image': 'lib/images/humberto-chavez-FVh_yqLR9eA-unsplash.jpg',
       'rating': '4.9',
-      'bio': 'Dr. Amanda Chavez is a Therapist with years of experience.',
-      'address': 'Via Roma 123, Milano',
-      'phone': '+39 02 1234567',
-      'email': 'amanda.chavez@example.com',
-      'hours': 'Lun-Ven 9:00-17:00',
+      'bio': 'Dr. Amanda Chaves is a Therapist with years of experience.',
+      'address': 'Via Vasca Navale 79',
+      'phone': '+39 03 1234567',
+      'email': 'amanda.chavez@clinic.com',
+      'hours': 'Mon-Fri 9:00-17:00',
     },
     {
       'name': 'Dr. Michael Uzor',
       'specialty': 'Dentist',
       'image': 'lib/images/dr_mike.jpg',
       'rating': '4.6',
-      'bio': 'Dr. Amanda Chavez is a Therapist with years of experience.',
-      'address': 'Via Roma 123, Milano',
-      'phone': '+39 02 1234567',
-      'email': 'amanda.chavez@example.com',
-      'hours': 'Lun-Ven 9:00-17:00',
+      'bio': 'Dr. Michael Uzor is a Dentist with years of experience.',
+      'address': 'Via Vasca Navale 79',
+      'phone': '+39 04 1234567',
+      'email': 'michael.uzor@clinic.com',
+      'hours': 'Wed-Sat 9:00-18:00',
     },
     {
       'name': 'Dr. Usman Yousaf',
-      'specialty': 'Surgeon',
+      'specialty': ' Plastic Surgeon',
       'image': 'lib/images/usman-yousaf-pTrhfmj2jDA-unsplash.jpg',
       'rating': '5.0',
-      'bio': 'Dr. Amanda Chavez is a Therapist with years of experience.',
-      'address': 'Via Roma 123, Milano',
-      'phone': '+39 02 1234567',
-      'email': 'amanda.chavez@example.com',
-      'hours': 'Lun-Ven 9:00-17:00',
+      'bio': 'Dr. Usman Yousaf is a Plastic Surgeon with years of experience.',
+      'address': 'Via Vasca Navale 79',
+      'phone': '+39 05 1234567',
+      'email': 'usman.yousaf@clinic.com',
+      'hours': 'Mon-Sat 9:00-18:30',
     },
     {
       'name': 'Dr. Rosa Fernandez',
       'specialty': 'Cardiologist',
       'image': 'lib/images/dr_rosa.jpg',
       'rating': '4.8',
-      'bio': 'Dr. Amanda Chavez is a Therapist with years of experience.',
-      'address': 'Via Roma 123, Milano',
-      'phone': '+39 02 1234567',
-      'email': 'amanda.chavez@example.com',
-      'hours': 'Lun-Ven 9:00-17:00',
+      'bio': 'Dr. Rosa Fernandez is a Cardiologist with years of experience.',
+      'address': 'Via Vasca Navale 79',
+      'phone': '+39 06 1234567',
+      'email': 'rosa.ferna@clinic.com',
+      'hours': 'Mon-Fri 10:00-19:00',
     },
     {
       'name': 'Dr. Elena Petrova',
       'specialty': 'Paediatrician',
       'image': 'lib/images/dr_elena.jpg',
       'rating': '4.7',
-      'bio': 'Dr. Amanda Chavez is a Therapist with years of experience.',
-      'address': 'Via Roma 123, Milano',
-      'phone': '+39 02 1234567',
-      'email': 'amanda.chavez@example.com',
-      'hours': 'Lun-Ven 9:00-17:00',
+      'bio': 'Dr. Elena Petrova is a Paediatrician with years of experience.',
+      'address': 'Via Vasca Navale 79',
+      'phone': '+39 07 1234567',
+      'email': 'elena.petrova@clinic.com',
+      'hours': 'Tue-Fri 10:00-17:00',
     },
     {
       'name': 'Dr. Michael Austin',
       'specialty': 'Dermatologist',
       'image': 'lib/images/dr_austin.jpg',
       'rating': '4.5',
-      'bio': 'Dr. Amanda Chavez is a Therapist with years of experience.',
-      'address': 'Via Roma 123, Milano',
-      'phone': '+39 02 1234567',
-      'email': 'amanda.chavez@example.com',
-      'hours': 'Lun-Ven 9:00-17:00',
+      'bio': 'Dr. Michael Austin is a Dermatologist with years of experience.',
+      'address': 'Via Vasca Navale 79',
+      'phone': '+39 08 1234567',
+      'email': 'mike.austin@clinic.com',
+      'hours': 'Mon-Fri 9:00-18:30',
     },
     {
       'name': 'Dr. Victor Singh',
       'specialty': 'Gynecologist',
       'image': 'lib/images/dr_victor.jpg',
       'rating': '4.4',
-      'bio': 'Dr. Amanda Chavez is a Therapist with years of experience.',
-      'address': 'Via Roma 123, Milano',
-      'phone': '+39 02 1234567',
-      'email': 'amanda.chavez@example.com',
-      'hours': 'Lun-Ven 9:00-17:00',
+      'bio': 'Dr. Victor Singh is a Gynecologist with years of experience.',
+      'address': 'Via Vasca Navale 79',
+      'phone': '+39 09 1234567',
+      'email': 'vic.singh@clinic.com',
+      'hours': 'Tue-Fri 10:00-18:00',
     },
   ];
 
@@ -366,26 +346,6 @@ class _HomeContentState extends State<_HomeContent> {
       filteredDoctors = results;
     });
   }
-
-  /*void _onCategoryTap(String categoryName) {
-    setState(() {
-      selectedSpecialty = categoryName;
-    });
-    _filterDoctors(_searchController.text);
-  }
-
-  void _onCategoryTap(String categoryName) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (_) => SpecialistPage(
-              specialty: categoryName,
-              allDoctors: doctors, // la lista completa dal tuo stato
-            ),
-      ),
-    );
-  }*/
 
   Future<void> _confirmLogout() async {
     final shouldLogout = await showDialog<bool>(
@@ -484,148 +444,6 @@ class _HomeContentState extends State<_HomeContent> {
                           const SizedBox(height: 8),
                         ],
                       ),
-
-                      // Icone in alto a destra: (1) menu profilo, (2) pulsante logout
-                      /*Row(
-                        children: [
-                          // 1) menu a tendina “Profilo”
-                          GestureDetector(
-                            onTapDown: (details) {
-                              final pos = details.globalPosition;
-                              showMenu<String>(
-                                context: context,
-                                position: RelativeRect.fromLTRB(
-                                  pos.dx,
-                                  pos.dy + 10,
-                                  pos.dx,
-                                  0,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                color: Colors.white,
-                                elevation: 8,
-                                items: [
-                                  PopupMenuItem(
-                                    value: 'profile',
-                                    child: ListTile(
-                                      leading: const Icon(Icons.person_outline),
-                                      title: Text(
-                                        'Profile',
-                                        style: AppTextStyles.body(
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 'prescriptions',
-                                    child: ListTile(
-                                      leading: const Icon(
-                                        Icons.medication_outlined,
-                                      ),
-                                      title: Text(
-                                        'Prescriptions',
-                                        style: AppTextStyles.body(
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 'appointments',
-                                    child: ListTile(
-                                      leading: const Icon(
-                                        Icons.event_note_outlined,
-                                      ),
-                                      title: Text(
-                                        'Appointments',
-                                        style: AppTextStyles.body(
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const PopupMenuDivider(),
-                                  PopupMenuItem(
-                                    value: 'logout',
-                                    child: ListTile(
-                                      leading: const Icon(
-                                        Icons.logout,
-                                        color: Colors.red,
-                                      ),
-                                      title: Text(
-                                        'Logout',
-                                        style: AppTextStyles.body(
-                                          color: Colors.red,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ).then((value) {
-                                switch (value) {
-                                  case 'profile':
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => const ProfilePage(),
-                                      ),
-                                    );
-                                    break;
-                                  case 'prescriptions':
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Sezione "Ricette" in arrivo!',
-                                          style: AppTextStyles.body(
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                    break;
-                                  case 'appointments':
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder:
-                                            (_) => const AppointmentsListPage(),
-                                      ),
-                                    );
-                                    break;
-                                  case 'logout':
-                                    _confirmLogout();
-                                    break;
-                                }
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.deepPurple[100],
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(Icons.person),
-                            ),
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          // 2) pulsante diretto di Logout
-                          IconButton(
-                            icon: const Icon(Icons.logout, color: Colors.red),
-                            onPressed: _confirmLogout,
-                          ),
-                        ],
-                      ),*/
                     ],
                   ),
                 ),
@@ -820,56 +638,6 @@ class _HomeContentState extends State<_HomeContent> {
                 ),
 
                 const SizedBox(height: 25),
-
-                // DOCTOR LIST
-                /*Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Doctor list',
-                        style: AppTextStyles.buttons(color: Colors.deepPurple),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                SizedBox(
-                  height: 250,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: filteredDoctors.length,
-                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                    itemBuilder: (context, i) {
-                      final docItem = filteredDoctors[i];
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (_) => AppointmentPage(
-                                      doctorName: docItem['name']!,
-                                    ),
-                              ),
-                            );
-                          },
-                          child: DoctorCard(
-                            doctorImagePath: docItem['image']!,
-                            rating: docItem['rating']!,
-                            doctorName: docItem['name']!,
-                            doctorProfession: docItem['specialty']!,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),*/
               ],
             ),
           ),
