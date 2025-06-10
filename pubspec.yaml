@@ -45,11 +45,10 @@ dependencies:
   material_design_icons_flutter: ^7.0.7296
 
   image_picker: any
-firebase_storage: any
-cached_network_image: any
-# image_picker: ^1.1.2
-#firebase_storage: ^12.4.6
-#cached_network_image: ^3.4.1 
+  firebase_storage: any
+  cached_network_image: any
+
+  url_launcher: ^6.3.1 
 
 
 

@@ -3,6 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 import 'package:medicare_app/pages/appointment_page.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+enum InfoType { phone, email, address, hours }
 
 class DoctorProfilePage extends StatelessWidget {
   final String name;
@@ -50,7 +53,7 @@ class DoctorProfilePage extends StatelessWidget {
             // Immagine rotonda, leggermente più grande
             Center(
               child: CircleAvatar(
-                radius: 80, // aumenta se vuoi ancora più grande
+                radius: 80,
                 backgroundColor: Colors.grey[200],
                 backgroundImage: AssetImage(imagePath),
               ),
@@ -91,24 +94,41 @@ class DoctorProfilePage extends StatelessWidget {
               const SizedBox(height: 24),
             ],
 
-            // Informazioni aggiuntive in righe con icona a sinistra
+            // Informazioni aggiuntive
             if (address.isNotEmpty) ...[
-              _infoRow(Icons.location_on, address),
+              _infoRow(
+                Icons.location_on,
+                address,
+                type: InfoType.address,
+                context: context,
+              ),
               const SizedBox(height: 12),
             ],
             if (phone.isNotEmpty) ...[
-              _infoRow(Icons.phone, phone),
+              _infoRow(
+                Icons.phone,
+                phone,
+                type: InfoType.phone,
+                context: context,
+              ),
               const SizedBox(height: 12),
             ],
             if (email.isNotEmpty) ...[
-              _infoRow(Icons.email, email),
+              _infoRow(
+                Icons.email,
+                email,
+                type: InfoType.email,
+                context: context,
+              ),
               const SizedBox(height: 12),
             ],
             if (hours.isNotEmpty) ...[
-              _infoRow(Icons.access_time, hours),
-              const SizedBox(height: 24),
+              // per le ore basta passare solo due argomenti o omettere type
+              _infoRow(Icons.access_time, hours, context: context),
+              const SizedBox(height: 12),
             ],
 
+            const SizedBox(height: 24),
             // Pulsante “Book an Appointment”
             SizedBox(
               width: double.infinity,
@@ -140,17 +160,86 @@ class DoctorProfilePage extends StatelessWidget {
     );
   }
 
-  // Widget di supporto per riga info con icona e testo
-  Widget _infoRow(IconData iconData, String text) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(iconData, color: Colors.deepPurple),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(text, style: AppTextStyles.body(color: Colors.black)),
+  Widget _infoRow(
+    IconData iconData,
+    String text, {
+    InfoType type = InfoType.hours,
+    required BuildContext context,
+  }) {
+    // Per “hours”: solo testo senza ripple
+    if (type == InfoType.hours) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(iconData, color: Colors.deepPurple),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(text, style: AppTextStyles.body(color: Colors.black)),
+          ),
+        ],
+      );
+    }
+
+    // Per gli altri tipi, usiamo InkWell dentro Material per visivo
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () async {
+          Uri uri;
+          try {
+            switch (type) {
+              case InfoType.phone:
+                // rimuovi spazi o parentesi se presenti:
+                final digits = text.replaceAll(RegExp(r'\s+|\(|\)|\-'), '');
+                uri = Uri(scheme: 'tel', path: digits);
+                break;
+              case InfoType.email:
+                final mail = text.trim();
+                uri = Uri(scheme: 'mailto', path: mail);
+                break;
+              case InfoType.address:
+                final encoded = Uri.encodeComponent(text.trim());
+                uri = Uri.parse(
+                  'https://www.google.com/maps/search/?api=1&query=$encoded',
+                );
+                break;
+              case InfoType.hours:
+                return;
+            }
+            // Proviamo ad aprire direttamente
+            if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Non è possibile aprire: $text')),
+              );
+            }
+          } catch (_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Errore tentando di aprire: $text')),
+            );
+          }
+        },
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(iconData, color: Colors.deepPurple),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  text,
+                  style: AppTextStyles.body(color: Colors.black).copyWith(
+                    decoration:
+                        TextDecoration
+                            .underline, // per far capire che è cliccabile
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ],
+      ),
     );
   }
 }
