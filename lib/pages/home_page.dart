@@ -11,6 +11,7 @@ import 'package:medicare_app/pages/profile_page.dart';
 import 'package:medicare_app/pages/appointments_list_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medicare_app/pages/specialist_page.dart';
 
 String getGreeting() {
@@ -126,10 +127,10 @@ class _MainScreenState extends State<MainScreen> {
     // Titoli e colori per la BottomBar
     const labels = ['Home', 'Appointments', 'Prescriptions', 'Profile'];
     const icons = [
-      Icons.home_outlined,
-      Icons.event_note_outlined,
-      Icons.medical_services_outlined,
-      Icons.person_outline,
+      FontAwesomeIcons.house,
+      FontAwesomeIcons.calendarDays,
+      FontAwesomeIcons.briefcaseMedical,
+      FontAwesomeIcons.userLarge,
     ];
 
     return Scaffold(
@@ -265,7 +266,7 @@ class _HomeContentState extends State<_HomeContent> {
   final List<Map<String, dynamic>> categories = [
     {
       'name': 'All',
-      'iconData': Icons.grid_view,
+      'iconData': FontAwesomeIcons.borderAll,
       'color': Colors.deepPurple.shade300,
     },
     {
@@ -280,7 +281,7 @@ class _HomeContentState extends State<_HomeContent> {
     },
     {
       'name': 'Eye Specialist',
-      'iconData': MdiIcons.eye,
+      'iconData': FontAwesomeIcons.solidEye,
       'color': Colors.orange.shade300,
     },
     {
@@ -290,12 +291,12 @@ class _HomeContentState extends State<_HomeContent> {
     },
     {
       'name': 'Paediatrician',
-      'iconData': MdiIcons.baby,
+      'iconData': FontAwesomeIcons.baby,
       'color': Colors.green.shade300,
     },
     {
       'name': 'Surgeon',
-      'iconData': MdiIcons.stethoscope,
+      'iconData': FontAwesomeIcons.stethoscope,
       'color': Colors.purple.shade300,
     },
     {
@@ -603,7 +604,7 @@ class _HomeContentState extends State<_HomeContent> {
 
                 // CATEGORIE SCORREVOLI ORIZZONTALMENTE (4×4 leggermente più grandi)
                 SizedBox(
-                  height: 150,
+                  height: 160,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
@@ -624,7 +625,7 @@ class _HomeContentState extends State<_HomeContent> {
                           );
                         },
                         child: SizedBox(
-                          width: 140,
+                          width: 160,
                           child: CategoryCard(
                             iconData: cat['iconData'],
                             categoryName: cat['name'],
