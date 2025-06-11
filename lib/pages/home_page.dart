@@ -13,6 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medicare_app/pages/specialist_page.dart';
+import 'package:medicare_app/pages/prescriptions_page.dart';
 
 String getGreeting() {
   final hour = DateTime.now().hour;
@@ -56,7 +57,7 @@ class _MainScreenState extends State<MainScreen> {
     _HomeContent(),
     AppointmentsListPage(),
     // placeholder per “Prescriptions” finché non la crei
-    Center(child: Text('Prescriptions coming soon')),
+    PrescriptionsPage(),
     ProfilePage(),
   ];
 
