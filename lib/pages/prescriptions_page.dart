@@ -1,72 +1,10 @@
-// lib/pages/prescriptions_page.dart
-
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:medicare_app/theme/text_styles.dart';
 import 'package:intl/intl.dart';
-
-// Include qui il modello PrescriptionRequest e enum definiti prima:
-enum PrescriptionStatus { pending, approved, rejected }
-
-enum PrescriptionType { medicine, visit }
-
-class PrescriptionRequest {
-  final String id;
-  final PrescriptionType type;
-  final String name;
-  final String? description;
-  final PrescriptionStatus status;
-  final DateTime timestamp;
-  final String doctorId;
-  final String? doctorName;
-
-  PrescriptionRequest({
-    required this.id,
-    required this.type,
-    required this.name,
-    this.description,
-    required this.status,
-    required this.timestamp,
-    required this.doctorId,
-    this.doctorName,
-  });
-
-  factory PrescriptionRequest.fromMap(String id, Map<String, dynamic> data) {
-    PrescriptionType type = PrescriptionType.values.firstWhere(
-      (e) => e.toString() == 'PrescriptionType.' + (data['type'] ?? 'medicine'),
-      orElse: () => PrescriptionType.medicine,
-    );
-    PrescriptionStatus status = PrescriptionStatus.values.firstWhere(
-      (e) =>
-          e.toString() == 'PrescriptionStatus.' + (data['status'] ?? 'pending'),
-      orElse: () => PrescriptionStatus.pending,
-    );
-    Timestamp? ts = data['timestamp'] as Timestamp?;
-    return PrescriptionRequest(
-      id: id,
-      type: type,
-      name: data['name'] as String? ?? '',
-      description: data['description'] as String?,
-      status: status,
-      timestamp: ts != null ? ts.toDate() : DateTime.now(),
-      doctorId: data['doctorId'] as String? ?? '',
-      doctorName: data['doctorName'] as String?,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'type': type.toString().split('.').last,
-      'name': name,
-      'description': description,
-      'status': status.toString().split('.').last,
-      'timestamp': Timestamp.fromDate(timestamp),
-      'doctorId': doctorId,
-      'doctorName': doctorName,
-    };
-  }
-}
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:medicare_app/models/prescription_request.dart';
+import 'package:medicare_app/services/prescription_service.dart';
+import 'package:medicare_app/theme/text_styles.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PrescriptionsPage extends StatefulWidget {
   const PrescriptionsPage({Key? key}) : super(key: key);
@@ -76,259 +14,218 @@ class PrescriptionsPage extends StatefulWidget {
 }
 
 class _PrescriptionsPageState extends State<PrescriptionsPage> {
-  int _selectedSection = 0; // 0 = richieste, 1 = nuova richiesta
-
-  String? _medicoBaseId;
-  String? _medicoBaseName;
-  bool _loadingDoctor = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadDoctorBase();
-  }
-
-  Future<void> _loadDoctorBase() async {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
-    final doc =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    final data = doc.data();
-    setState(() {
-      _medicoBaseId = data?['medicoBaseId'] as String?;
-      _medicoBaseName = data?['medicoBaseName'] as String?;
-      _loadingDoctor = false;
-    });
-  }
-
-  Future<void> sendPrescriptionRequest({
-    required PrescriptionType type,
-    required String name,
-    String? description,
-    required String doctorId,
-    required String doctorName,
-  }) async {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
-    final docRef =
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('prescriptions')
-            .doc();
-    final now = DateTime.now();
-    final request = PrescriptionRequest(
-      id: docRef.id,
-      type: type,
-      name: name,
-      description: description,
-      status: PrescriptionStatus.pending,
-      timestamp: now,
-      doctorId: doctorId,
-      doctorName: doctorName,
-    );
-    await docRef.set(request.toMap());
-  }
+  final PrescriptionService _service = PrescriptionService();
+  // 0: pending, 1: approved, 2: rejected
+  int _selectedIndex = 0;
+  // per mostrare form o lista
+  bool _showForm = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        title: Text(
+          'Prescriptions',
+          style: AppTextStyles.title2(color: Colors.grey[800]!),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
       ),
       body: Column(
         children: [
-          const SizedBox(height: 16),
-          // Toggle alto tra richieste / nuova richiesta
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(30),
-            ),
+          // Toggle “Le mie richieste” vs “Nuova richiesta”
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: Row(
-              children: List.generate(2, (index) {
-                final labels = ['My Requests', 'New Request'];
-                final isSel = index == _selectedSection;
-                return Expanded(
+              children: [
+                Expanded(
                   child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedSection = index;
-                      });
-                    },
+                    onTap: () => setState(() => _showForm = false),
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
                         color:
-                            isSel
+                            !_showForm
                                 ? Colors.deepPurple.shade300
-                                : Colors.transparent,
-                        borderRadius: BorderRadius.circular(20),
+                                : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Center(
                         child: Text(
-                          labels[index],
-                          style: AppTextStyles.buttons(
-                            color: isSel ? Colors.white : Colors.grey[700]!,
+                          'Le mie richieste',
+                          style: AppTextStyles.body(
+                            color: !_showForm ? Colors.white : Colors.black,
                           ),
                         ),
                       ),
                     ),
                   ),
-                );
-              }),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _showForm = true),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color:
+                            _showForm
+                                ? Colors.deepPurple.shade300
+                                : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Nuova richiesta',
+                          style: AppTextStyles.body(
+                            color: _showForm ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          // Contenuto
           Expanded(
             child:
-                _selectedSection == 0
-                    ? StreamBuilder<QuerySnapshot>(
-                      stream:
-                          FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(FirebaseAuth.instance.currentUser!.uid)
-                              .collection('prescriptions')
-                              .orderBy('timestamp', descending: true)
-                              .snapshots(),
+                _showForm
+                    ? NewPrescriptionForm()
+                    : StreamBuilder<List<PrescriptionRequest>>(
+                      stream: _service.watchRequestsForUser(),
                       builder: (context, snap) {
                         if (snap.connectionState == ConnectionState.waiting) {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
                         }
-                        final docs = snap.data?.docs ?? [];
-                        final requests =
-                            docs.map((doc) {
-                              return PrescriptionRequest.fromMap(
-                                doc.id,
-                                doc.data() as Map<String, dynamic>,
-                              );
-                            }).toList();
-                        return _RequestsListView(allRequests: requests);
+                        if (!snap.hasData) {
+                          return Center(
+                            child: Text(
+                              'Errore nel caricamento',
+                              style: AppTextStyles.body(color: Colors.black),
+                            ),
+                          );
+                        }
+                        final all = snap.data!;
+                        // Toggle interno per stato
+                        return Column(
+                          children: [
+                            // filtro stato: pending/approved/rejected
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: Row(
+                                  children: List.generate(3, (idx) {
+                                    final labels = [
+                                      'In attesa',
+                                      'Approvate',
+                                      'Rifiutate',
+                                    ];
+                                    final isSel = idx == _selectedIndex;
+                                    return Expanded(
+                                      child: GestureDetector(
+                                        onTap:
+                                            () => setState(
+                                              () => _selectedIndex = idx,
+                                            ),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 8,
+                                          ),
+                                          margin: const EdgeInsets.symmetric(
+                                            horizontal: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                isSel
+                                                    ? Colors.deepPurple.shade300
+                                                    : Colors.transparent,
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              labels[idx],
+                                              style: AppTextStyles.body(
+                                                color:
+                                                    isSel
+                                                        ? Colors.white
+                                                        : Colors.grey[700]!,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // Lista filtrata
+                            Expanded(
+                              child: Builder(
+                                builder: (_) {
+                                  PrescriptionStatus filter;
+                                  switch (_selectedIndex) {
+                                    case 1:
+                                      filter = PrescriptionStatus.approved;
+                                      break;
+                                    case 2:
+                                      filter = PrescriptionStatus.rejected;
+                                      break;
+                                    case 0:
+                                    default:
+                                      filter = PrescriptionStatus.pending;
+                                  }
+                                  final filtered =
+                                      all
+                                          .where((r) => r.status == filter)
+                                          .toList();
+                                  if (filtered.isEmpty) {
+                                    return Center(
+                                      child: Text(
+                                        'Nessuna richiesta.',
+                                        style: AppTextStyles.body(
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return ListView.builder(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
+                                    itemCount: filtered.length,
+                                    itemBuilder:
+                                        (ctx, i) =>
+                                            _buildRequestCard(filtered[i]),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        );
                       },
-                    )
-                    : _loadingDoctor
-                    ? const Center(child: CircularProgressIndicator())
-                    : (_medicoBaseId == null || _medicoBaseName == null)
-                    ? Center(
-                      child: Text(
-                        'You do not have a medical practitioner.',
-                        style: AppTextStyles.body(color: Colors.black),
-                      ),
-                    )
-                    : _NewRequestForm(
-                      doctorId: _medicoBaseId!,
-                      doctorName: _medicoBaseName!,
                     ),
           ),
         ],
       ),
-    );
-  }
-}
-
-// Widget per la lista delle richieste, con toggle interno per stato
-class _RequestsListView extends StatefulWidget {
-  final List<PrescriptionRequest> allRequests;
-  const _RequestsListView({required this.allRequests, Key? key})
-    : super(key: key);
-
-  @override
-  State<_RequestsListView> createState() => _RequestsListViewState();
-}
-
-class _RequestsListViewState extends State<_RequestsListView> {
-  int _selectedIndex = 0; // 0: pending, 1: approved, 2: rejected
-
-  @override
-  Widget build(BuildContext context) {
-    // Filtra in base a _selectedIndex
-    PrescriptionStatus statusFilter;
-    switch (_selectedIndex) {
-      case 0:
-        statusFilter = PrescriptionStatus.pending;
-        break;
-      case 1:
-        statusFilter = PrescriptionStatus.approved;
-        break;
-      case 2:
-      default:
-        statusFilter = PrescriptionStatus.rejected;
-    }
-    final filtered =
-        widget.allRequests.where((r) => r.status == statusFilter).toList();
-
-    return Column(
-      children: [
-        // Toggle pill per stato
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Row(
-            children: List.generate(3, (index) {
-              final labels = ['Pending', 'Approved', 'Rejected'];
-              final isSel = index == _selectedIndex;
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      color:
-                          isSel
-                              ? Colors.deepPurple.shade300
-                              : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Center(
-                      child: Text(
-                        labels[index],
-                        style: AppTextStyles.buttons(
-                          color: isSel ? Colors.white : Colors.grey[700]!,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
-        const SizedBox(height: 16),
-        // Lista filtrata
-        Expanded(
-          child:
-              filtered.isEmpty
-                  ? Center(
-                    child: Text(
-                      'No requests.',
-                      style: AppTextStyles.body(color: Colors.black),
-                    ),
-                  )
-                  : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: filtered.length,
-                    itemBuilder: (ctx, i) {
-                      final req = filtered[i];
-                      return _buildRequestCard(req);
-                    },
-                  ),
-        ),
-      ],
     );
   }
 
@@ -338,27 +235,27 @@ class _RequestsListViewState extends State<_RequestsListView> {
     switch (req.status) {
       case PrescriptionStatus.pending:
         statusColor = Colors.orange;
-        statusText = 'Pending';
+        statusText = 'In attesa';
         break;
       case PrescriptionStatus.approved:
         statusColor = Colors.green;
-        statusText = 'Approved';
+        statusText = 'Approvata';
         break;
       case PrescriptionStatus.rejected:
+      default:
         statusColor = Colors.red;
-        statusText = 'Rejected';
-        break;
+        statusText = 'Rifiutata';
     }
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Riga superiore: Icona + tipo + data
+            // Riga superiore: tipo + data
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -415,11 +312,63 @@ class _RequestsListViewState extends State<_RequestsListView> {
                     ),
                   ],
                 ),
-                if (req.status == PrescriptionStatus.approved) ...[
+                if (req.status == PrescriptionStatus.approved)
                   ElevatedButton(
                     onPressed: () {
-                      // Apri prescrizione: genera o mostra PDF / barcode
-                      _showPrescriptionDetail(context, req);
+                      // ad esempio mostra barcode o PDF
+                      showDialog(
+                        context: context,
+                        builder:
+                            (_) => AlertDialog(
+                              title: Text(
+                                'Prescrizione: ${req.name}',
+                                style: AppTextStyles.title2(
+                                  color: Colors.black,
+                                ),
+                              ),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // qui un widget barcode o placeholder
+                                  Container(
+                                    height: 100,
+                                    width: 200,
+                                    color: Colors.grey[300],
+                                    child: Center(child: Text('BARCODE')),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      // apri PDF se disponibile: req.pdfUrl
+                                    },
+                                    icon: Icon(
+                                      Icons.picture_as_pdf,
+                                      color: Colors.white,
+                                    ),
+                                    label: Text(
+                                      'Visualizza PDF',
+                                      style: AppTextStyles.buttons(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          Colors.deepPurple.shade300,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text('Chiudi'),
+                                ),
+                              ],
+                            ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple.shade300,
@@ -428,11 +377,10 @@ class _RequestsListViewState extends State<_RequestsListView> {
                       ),
                     ),
                     child: Text(
-                      'Open prescription',
+                      'Apri prescrizione',
                       style: AppTextStyles.buttons(color: Colors.white),
                     ),
                   ),
-                ],
               ],
             ),
           ],
@@ -440,75 +388,41 @@ class _RequestsListViewState extends State<_RequestsListView> {
       ),
     );
   }
-
-  void _showPrescriptionDetail(BuildContext context, PrescriptionRequest req) {
-    showDialog(
-      context: context,
-      builder:
-          (_) => AlertDialog(
-            title: Text(
-              'Prescription for ${req.name}',
-              style: AppTextStyles.title2(color: Colors.black),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  height: 100,
-                  width: 200,
-                  color: Colors.grey[300],
-                  child: Center(child: Text('BARCODE PLACEHOLDER')),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Qui potresti integrare un PDF viewer
-                  },
-                  icon: Icon(Icons.picture_as_pdf, color: Colors.white),
-                  label: Text(
-                    'View PDF',
-                    style: AppTextStyles.buttons(color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple.shade300,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Chiudi'),
-              ),
-            ],
-          ),
-    );
-  }
 }
 
-// Form nuova richiesta
-class _NewRequestForm extends StatefulWidget {
-  final String doctorId;
-  final String doctorName;
-  const _NewRequestForm({
-    required this.doctorId,
-    required this.doctorName,
-    Key? key,
-  }) : super(key: key);
+class NewPrescriptionForm extends StatefulWidget {
+  const NewPrescriptionForm({Key? key}) : super(key: key);
 
   @override
-  State<_NewRequestForm> createState() => _NewRequestFormState();
+  State<NewPrescriptionForm> createState() => _NewPrescriptionFormState();
 }
 
-class _NewRequestFormState extends State<_NewRequestForm> {
+class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
+  final _formKey = GlobalKey<FormState>();
   PrescriptionType _type = PrescriptionType.medicine;
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
   bool _isSubmitting = false;
+  final PrescriptionService _service = PrescriptionService();
+
+  String _doctorName = ''; // verrà caricato dal profilo
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDoctorName();
+  }
+
+  Future<void> _loadDoctorName() async {
+    // Carica il nome del medico di base dal documento user (campo 'medicoBase')
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final doc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final data = doc.data();
+    setState(() {
+      _doctorName = data?['medicoBase'] as String? ?? '';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -520,7 +434,7 @@ class _NewRequestFormState extends State<_NewRequestForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Type of request',
+              'Tipo di richiesta',
               style: AppTextStyles.subtitle(color: Colors.deepPurple),
             ),
             const SizedBox(height: 8),
@@ -541,7 +455,7 @@ class _NewRequestFormState extends State<_NewRequestForm> {
                       ),
                       child: Center(
                         child: Text(
-                          'Medicine',
+                          'Medicinale',
                           style: AppTextStyles.body(
                             color:
                                 _type == PrescriptionType.medicine
@@ -568,7 +482,7 @@ class _NewRequestFormState extends State<_NewRequestForm> {
                       ),
                       child: Center(
                         child: Text(
-                          'Visit',
+                          'Visita',
                           style: AppTextStyles.body(
                             color:
                                 _type == PrescriptionType.visit
@@ -588,8 +502,8 @@ class _NewRequestFormState extends State<_NewRequestForm> {
               decoration: InputDecoration(
                 labelText:
                     _type == PrescriptionType.medicine
-                        ? 'Medicine name'
-                        : 'Type of requested visit',
+                        ? 'Nome del medicinale'
+                        : 'Tipo di visita richiesta',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -603,7 +517,7 @@ class _NewRequestFormState extends State<_NewRequestForm> {
             TextFormField(
               controller: _descController,
               decoration: InputDecoration(
-                labelText: 'Additional notes (optional)',
+                labelText: 'Note aggiuntive (opzionale)',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -633,7 +547,7 @@ class _NewRequestFormState extends State<_NewRequestForm> {
                           ),
                         )
                         : Text(
-                          'Send request',
+                          'Invia richiesta',
                           style: AppTextStyles.buttons(color: Colors.white),
                         ),
               ),
@@ -646,48 +560,55 @@ class _NewRequestFormState extends State<_NewRequestForm> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_doctorName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Medico di base non configurato',
+            style: AppTextStyles.body(color: Colors.black),
+          ),
+        ),
+      );
+      return;
+    }
     setState(() => _isSubmitting = true);
     try {
-      final name = _nameController.text.trim();
-      final desc = _descController.text.trim();
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection('prescriptions')
-          .doc()
-          .set(
-            PrescriptionRequest(
-              id: '', // temporaneo, Firestore genererà ID
-              type: _type,
-              name: name,
-              description: desc.isEmpty ? null : desc,
-              status: PrescriptionStatus.pending,
-              timestamp: DateTime.now(),
-              doctorId: widget.doctorId,
-              doctorName: widget.doctorName,
-            ).toMap(),
-          );
+      await _service.sendRequest(
+        type: _type,
+        name: _nameController.text.trim(),
+        description:
+            _descController.text.trim().isEmpty
+                ? null
+                : _descController.text.trim(),
+        doctorName: _doctorName,
+      );
+      // pulisci form e torna a lista
       _nameController.clear();
       _descController.clear();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Request sent!',
-            style: AppTextStyles.body(color: Colors.white),
+            'Richiesta inviata',
+            style: AppTextStyles.body(color: Colors.black),
           ),
         ),
       );
+      setState(() {
+        _isSubmitting = false;
+      });
+      // resta sulla form o torna su “Le mie richieste”? Se vuoi tornare:
+      // final parent = context.findAncestorStateOfType<_PrescriptionsPageState>();
+      // parent?._showForm = false;
     } catch (e) {
+      setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Errore durante l\'invio: $e',
-            style: AppTextStyles.body(color: Colors.white),
+            'Errore durante l\'invio',
+            style: AppTextStyles.body(color: Colors.black),
           ),
         ),
       );
-    } finally {
-      setState(() => _isSubmitting = false);
     }
   }
 }
