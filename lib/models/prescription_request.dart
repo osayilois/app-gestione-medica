@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum PrescriptionType { medicine, visit }
 
-enum PrescriptionStatus { pending, approved, rejected }
+enum PrescriptionStatus { pending, approved, declined }
 
 class PrescriptionRequest {
   final String id;
@@ -13,7 +13,6 @@ class PrescriptionRequest {
   final PrescriptionStatus status;
   final DateTime timestamp;
   final String doctorName; // nome medico di base
-  // se vuoi usare doctorId reale, aggiungi qui
 
   PrescriptionRequest({
     required this.id,

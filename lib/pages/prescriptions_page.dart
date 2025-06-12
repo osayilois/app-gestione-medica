@@ -5,6 +5,7 @@ import 'package:medicare_app/models/prescription_request.dart';
 import 'package:medicare_app/services/prescription_service.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class PrescriptionsPage extends StatefulWidget {
   const PrescriptionsPage({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class PrescriptionsPage extends StatefulWidget {
 
 class _PrescriptionsPageState extends State<PrescriptionsPage> {
   final PrescriptionService _service = PrescriptionService();
-  // 0: pending, 1: approved, 2: rejected
+  // 0: pending, 1: approved, 2: declined
   int _selectedIndex = 0;
   // per mostrare form o lista
   bool _showForm = false;
@@ -26,8 +27,8 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Prescriptions',
-          style: AppTextStyles.title2(color: Colors.grey[800]!),
+          'All your prescription requests are shown here',
+          style: AppTextStyles.buttons(color: Colors.grey[800]!),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -54,7 +55,7 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
                       ),
                       child: Center(
                         child: Text(
-                          'Le mie richieste',
+                          'My requests',
                           style: AppTextStyles.body(
                             color: !_showForm ? Colors.white : Colors.black,
                           ),
@@ -78,7 +79,7 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
                       ),
                       child: Center(
                         child: Text(
-                          'Nuova richiesta',
+                          'New request',
                           style: AppTextStyles.body(
                             color: _showForm ? Colors.white : Colors.black,
                           ),
@@ -105,7 +106,7 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
                         if (!snap.hasData) {
                           return Center(
                             child: Text(
-                              'Errore nel caricamento',
+                              'Loading error',
                               style: AppTextStyles.body(color: Colors.black),
                             ),
                           );
@@ -114,7 +115,7 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
                         // Toggle interno per stato
                         return Column(
                           children: [
-                            // filtro stato: pending/approved/rejected
+                            // filtro stato: pending/approved/declined
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -131,9 +132,9 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
                                 child: Row(
                                   children: List.generate(3, (idx) {
                                     final labels = [
-                                      'In attesa',
-                                      'Approvate',
-                                      'Rifiutate',
+                                      'Pending',
+                                      'Approved',
+                                      'Declined',
                                     ];
                                     final isSel = idx == _selectedIndex;
                                     return Expanded(
@@ -187,7 +188,7 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
                                       filter = PrescriptionStatus.approved;
                                       break;
                                     case 2:
-                                      filter = PrescriptionStatus.rejected;
+                                      filter = PrescriptionStatus.declined;
                                       break;
                                     case 0:
                                     default:
@@ -200,7 +201,7 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
                                   if (filtered.isEmpty) {
                                     return Center(
                                       child: Text(
-                                        'Nessuna richiesta.',
+                                        'No requests.',
                                         style: AppTextStyles.body(
                                           color: Colors.black,
                                         ),
@@ -235,16 +236,16 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
     switch (req.status) {
       case PrescriptionStatus.pending:
         statusColor = Colors.orange;
-        statusText = 'In attesa';
+        statusText = 'Pending';
         break;
       case PrescriptionStatus.approved:
         statusColor = Colors.green;
-        statusText = 'Approvata';
+        statusText = 'Approved';
         break;
-      case PrescriptionStatus.rejected:
+      case PrescriptionStatus.declined:
       default:
         statusColor = Colors.red;
-        statusText = 'Rifiutata';
+        statusText = 'Declined';
     }
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -263,15 +264,15 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
                   children: [
                     Icon(
                       req.type == PrescriptionType.medicine
-                          ? Icons.medical_services
-                          : Icons.calendar_today,
-                      color: Colors.deepPurple,
+                          ? FontAwesomeIcons.prescriptionBottleMedical
+                          : FontAwesomeIcons.calendarWeek,
+                      color: Colors.deepPurple.shade300,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       req.type == PrescriptionType.medicine
-                          ? 'Medicinale'
-                          : 'Visita',
+                          ? 'Medication'
+                          : 'Visit',
                       style: AppTextStyles.subtitle(color: Colors.black),
                     ),
                   ],
@@ -346,7 +347,7 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
                                       color: Colors.white,
                                     ),
                                     label: Text(
-                                      'Visualizza PDF',
+                                      'View PDF',
                                       style: AppTextStyles.buttons(
                                         color: Colors.white,
                                       ),
@@ -364,7 +365,7 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
-                                  child: Text('Chiudi'),
+                                  child: Text('Close'),
                                 ),
                               ],
                             ),
@@ -377,7 +378,7 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
                       ),
                     ),
                     child: Text(
-                      'Apri prescrizione',
+                      'Open prescription',
                       style: AppTextStyles.buttons(color: Colors.white),
                     ),
                   ),
@@ -434,7 +435,7 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Tipo di richiesta',
+              'Type of request',
               style: AppTextStyles.subtitle(color: Colors.deepPurple),
             ),
             const SizedBox(height: 8),
@@ -455,7 +456,7 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
                       ),
                       child: Center(
                         child: Text(
-                          'Medicinale',
+                          'Medication',
                           style: AppTextStyles.body(
                             color:
                                 _type == PrescriptionType.medicine
@@ -482,7 +483,7 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
                       ),
                       child: Center(
                         child: Text(
-                          'Visita',
+                          'Visit',
                           style: AppTextStyles.body(
                             color:
                                 _type == PrescriptionType.visit
@@ -502,14 +503,14 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
               decoration: InputDecoration(
                 labelText:
                     _type == PrescriptionType.medicine
-                        ? 'Nome del medicinale'
-                        : 'Tipo di visita richiesta',
+                        ? 'Medication Name'
+                        : 'Type of visit request',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Campo richiesto';
+                if (v == null || v.trim().isEmpty) return 'Required field';
                 return null;
               },
             ),
@@ -517,7 +518,7 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
             TextFormField(
               controller: _descController,
               decoration: InputDecoration(
-                labelText: 'Note aggiuntive (opzionale)',
+                labelText: 'Add note (optional)',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -547,7 +548,7 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
                           ),
                         )
                         : Text(
-                          'Invia richiesta',
+                          'Send request',
                           style: AppTextStyles.buttons(color: Colors.white),
                         ),
               ),
@@ -564,7 +565,7 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Medico di base non configurato',
+            'Medical practitioner not updated',
             style: AppTextStyles.body(color: Colors.black),
           ),
         ),
@@ -588,8 +589,8 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Richiesta inviata',
-            style: AppTextStyles.body(color: Colors.black),
+            'Request sent',
+            style: AppTextStyles.body(color: Colors.white),
           ),
         ),
       );
@@ -604,7 +605,7 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Errore durante l\'invio',
+            "Error while sending",
             style: AppTextStyles.body(color: Colors.black),
           ),
         ),

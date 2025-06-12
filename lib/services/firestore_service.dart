@@ -21,7 +21,7 @@ class FirestoreService {
   }) {
     return _db.doc(path).snapshots().map((snap) {
       final d = snap.data();
-      if (d == null) throw StateError('Documento $path non trovato');
+      if (d == null) throw StateError('Document $path not found');
       return builder(d, snap.id);
     });
   }
