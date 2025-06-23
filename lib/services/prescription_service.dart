@@ -2,9 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:medicare_app/models/prescription_request.dart';
 import 'package:medicare_app/services/firestore_service.dart';
+import 'package:medicare_app/util/pdf_generator.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart' show SettableMetadata;
 
 class PrescriptionService {
   final FirestoreService _fs = FirestoreService();
+  final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -80,7 +84,7 @@ class PrescriptionService {
   // ===============================
 
   /// 🔄 Stream per vedere tutte le richieste
-  Stream<List<Map<String, dynamic>>> getAllRequestsStream() {
+  /* Stream<List<Map<String, dynamic>>> getAllRequestsStream() {
     return _firestore
         .collection('prescriptions')
         .orderBy('timestamp', descending: true)
@@ -101,9 +105,9 @@ class PrescriptionService {
             };
           }).toList();
         });
-  }
+  } */
 
-  /// 🟢 Cambia stato (usato dall'admin)
+  /* /// 🟢 Cambia stato (usato dall'admin)
   Future<void> updateRequestStatus(String requestId, String newStatus) async {
     await _firestore.collection('prescriptions').doc(requestId).update({
       'status': newStatus,
@@ -120,6 +124,80 @@ class PrescriptionService {
           .collection('prescriptions')
           .doc(requestId)
           .update({'status': newStatus});
+    }
+  } */
+
+  /// Admin: approva, genera PDF+barcode, salva in Storage e Firestore.
+  Future<void> approveRequestAndGeneratePdf({required String requestId}) async {
+    // 1) recupera il documento in /prescriptions/{requestId}
+    final docRef = _firestore.collection('prescriptions').doc(requestId);
+    final docSnap = await docRef.get();
+    if (!docSnap.exists) throw Exception("Request $requestId non trovato");
+
+    final data = docSnap.data()!;
+    final patientId = data['patientId'] as String?;
+    final patientName = data['patientName'] as String? ?? 'Unknown';
+    final type = data['type'] as String? ?? '';
+    final name = data['name'] as String? ?? '';
+    final message = data['message'] as String? ?? '';
+    // Prepara i campi per PDF: ad es. medicine=name, dosage=message o dettagli...
+    final medicineOrVisit = name;
+    final dosageOrDetails = message.isNotEmpty ? message : 'N/A';
+
+    // 2) Genera PDF + barcode
+    final pdfResult = await generatePrescriptionPdfData(
+      patientName: patientName,
+      medicineOrVisit: medicineOrVisit,
+      dosageOrDetails: dosageOrDetails,
+    );
+
+    // 3) Carica PDF su Firebase Storage
+    final storageRef = _storage
+        .ref()
+        .child('prescriptions_pdf')
+        .child('$requestId.pdf');
+    // Metadata: contentType
+    final metadata = SettableMetadata(contentType: 'application/pdf');
+    await storageRef.putData(pdfResult.data, metadata);
+    final pdfUrl = await storageRef.getDownloadURL();
+
+    // 4) Aggiorna Firestore:
+    // - in /prescriptions/{requestId}
+    await docRef.update({
+      'status': 'approved',
+      'pdfUrl': pdfUrl,
+      'barcodeData': pdfResult.barcodeData,
+    });
+    // - nel sotto-documento utente: /users/{patientId}/prescriptions/{requestId}
+    if (patientId != null && patientId.isNotEmpty) {
+      final userDocRef = _firestore
+          .collection('users')
+          .doc(patientId)
+          .collection('prescriptions')
+          .doc(requestId);
+      await userDocRef.update({
+        'status': 'approved',
+        'pdfUrl': pdfUrl,
+        'barcodeData': pdfResult.barcodeData,
+      });
+    }
+  }
+
+  /// Admin: rifiuta richiesta
+  Future<void> declineRequest({required String requestId}) async {
+    final docRef = _firestore.collection('prescriptions').doc(requestId);
+    final docSnap = await docRef.get();
+    if (!docSnap.exists) return;
+    final data = docSnap.data()!;
+    final patientId = data['patientId'] as String?;
+    await docRef.update({'status': 'declined'});
+    if (patientId != null && patientId.isNotEmpty) {
+      await _firestore
+          .collection('users')
+          .doc(patientId)
+          .collection('prescriptions')
+          .doc(requestId)
+          .update({'status': 'declined'});
     }
   }
 }

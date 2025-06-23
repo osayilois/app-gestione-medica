@@ -50,7 +50,12 @@ dependencies:
 
   url_launcher: ^6.3.1 
   font_awesome_flutter: ^10.8.0
-  barcode_widgets: ^2.0.0
+  barcode: ^2.2.9   
+  printing: ^5.14.2
+  pdf: ^3.11.3
+  http: ^1.4.0
+  
+
 
 
 

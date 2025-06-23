@@ -6,6 +6,7 @@ import 'package:medicare_app/services/prescription_service.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:medicare_app/util/pdf_generator.dart';
 
 class PrescriptionsPage extends StatefulWidget {
   const PrescriptionsPage({Key? key}) : super(key: key);
