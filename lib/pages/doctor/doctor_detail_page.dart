@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:medicare_app/theme/text_styles.dart';
-import 'package:medicare_app/pages/appointment_page.dart';
+import 'package:medicare_app/pages/appointments/appointment_page.dart';
 
 class DoctorDetailPage extends StatelessWidget {
   final String name;

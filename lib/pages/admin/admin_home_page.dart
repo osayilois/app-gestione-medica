@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:medicare_app/pages/admin_prescription_page.dart';
+import 'package:medicare_app/pages/admin/admin_prescription_page.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';

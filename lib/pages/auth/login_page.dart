@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:medicare_app/pages/home_page.dart';
-import 'package:medicare_app/pages/register_page.dart';
+import 'package:medicare_app/pages/home/home_page.dart';
+import 'package:medicare_app/pages/auth/register_page.dart';
 import 'package:medicare_app/theme/text_styles.dart';
-import 'package:medicare_app/pages/admin_home_page.dart';
+import 'package:medicare_app/pages/admin/admin_home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

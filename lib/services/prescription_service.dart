@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:medicare_app/models/prescription_request.dart';
+import 'package:medicare_app/pages/prescriptions/prescription_request.dart';
 import 'package:medicare_app/services/firestore_service.dart';
+import 'dart:typed_data';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class PrescriptionService {
   final FirestoreService _fs = FirestoreService();
@@ -73,6 +75,17 @@ class PrescriptionService {
     await _fs.updateData(path, {
       'status': newStatus.toString().split('.').last,
     });
+  }
+
+  Future<Uint8List?> downloadPdfBytes(String url) async {
+    try {
+      final ref = FirebaseStorage.instance.refFromURL(url);
+      final data = await ref.getData();
+      return data;
+    } catch (e) {
+      print('Errore nel download PDF: $e');
+      return null;
+    }
   }
 
   // ===============================

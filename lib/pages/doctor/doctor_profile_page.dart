@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:medicare_app/theme/text_styles.dart';
-import 'package:medicare_app/pages/appointment_page.dart';
+import 'package:medicare_app/pages/appointments/appointment_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 enum InfoType { phone, email, address, hours }

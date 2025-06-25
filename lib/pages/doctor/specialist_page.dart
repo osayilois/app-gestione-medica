@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 import 'package:medicare_app/util/doctor_card.dart';
-import 'package:medicare_app/pages/doctor_profile_page.dart';
+import 'package:medicare_app/pages/doctor/doctor_profile_page.dart';
 
 enum SortOrder { az, za }
 
