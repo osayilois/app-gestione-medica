@@ -15,9 +15,9 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+## 📁 Directory structure
 
-# Directory Structure
-
+```plaintext
 lib/
 │
 ├── main.dart                         # Entry point
@@ -28,7 +28,6 @@ lib/
 ├── util/
 │   ├── doctor_card.dart             # Widget riutilizzabili
 │   └── category_card.dart
-│
 │
 ├── services/
 │   ├── auth_service.dart            # Login/Logout/Firebase auth
@@ -52,7 +51,6 @@ lib/
 │   │   ├── register_page.dart
 │   │   └── forgot_password_page.dart # Da inserire
 │   │ 
-│   │    
 │   ├── data/
 │   │   ├── mock_doctors.dart
 │   │   └── specialty_categories.dart
@@ -72,8 +70,9 @@ lib/
 │   ├── admin/
 │   │   ├── admin_home_page.dart
 │   │   └── admin_prescription_page.dart
-│   │   
+│   │
 │   └── doctor/
-│   │   ├── doctor_detail_page.dart
-│   │   ├── doctor_profile_page.dart
-│   │   └── specialist_page.dart
+│       ├── doctor_detail_page.dart
+│       ├── doctor_profile_page.dart
+│       └── specialist_page.dart
+```
