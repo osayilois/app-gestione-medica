@@ -84,7 +84,7 @@ class DoctorProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Bio centrata (se presente)
+            // Bio centrata
             if (bio.isNotEmpty) ...[
               Text(
                 bio,
@@ -123,7 +123,6 @@ class DoctorProfilePage extends StatelessWidget {
               const SizedBox(height: 12),
             ],
             if (hours.isNotEmpty) ...[
-              // per le ore basta passare solo due argomenti o omettere type
               _infoRow(Icons.access_time, hours, context: context),
               const SizedBox(height: 12),
             ],

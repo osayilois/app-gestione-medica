@@ -19,6 +19,7 @@ import 'package:medicare_app/widgets/specialists_section.dart';
 import 'package:medicare_app/widgets/logout_dialog.dart';
 import 'package:medicare_app/data/mock_doctors.dart';
 import 'package:medicare_app/data/specialty_categories.dart';
+import 'package:medicare_app/widgets/top_rated_doctors_section.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -200,6 +201,14 @@ class _HomeContentState extends State<HomeContent> {
                   );
                 },
               ),
+
+              // subito dopo le categorie, aggiungi
+              const SizedBox(height: 25),
+              TopRatedDoctorsSection(
+                doctors: doctors, // la tua lista di dottori
+                threshold: 4.8, // soglia minima per essere top rated
+              ),
+              const SizedBox(height: 25),
             ],
           ),
         ),
