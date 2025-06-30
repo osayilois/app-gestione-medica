@@ -18,7 +18,8 @@ class MedicalBanner extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.start, // start per allineare a sinistra
         children: [
           if (!hasMedical) ...[
             // Banner solo per il primo login
@@ -78,10 +79,14 @@ class MedicalBanner extends StatelessWidget {
             const SizedBox(height: 20),
           ],
 
-          // Titolo visibile SEMPRE
-          Text(
-            "Let's find your \nDoctor",
-            style: AppTextStyles.bigtitle(color: Colors.black),
+          // Titolo sempre allineato a sinistra
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              "Let's find your \nDoctor",
+              style: AppTextStyles.bigtitle(color: Colors.black),
+              textAlign: TextAlign.left,
+            ),
           ),
         ],
       ),
