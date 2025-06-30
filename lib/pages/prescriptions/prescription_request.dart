@@ -13,6 +13,8 @@ class PrescriptionRequest {
   final PrescriptionStatus status;
   final DateTime timestamp;
   final String doctorName; // nome medico di base
+  final String? pdfData;
+  final String? barcodeData;
 
   PrescriptionRequest({
     required this.id,
@@ -23,6 +25,8 @@ class PrescriptionRequest {
     required this.status,
     required this.timestamp,
     required this.doctorName,
+    this.pdfData,
+    this.barcodeData,
   });
 
   factory PrescriptionRequest.fromMap(String id, Map<String, dynamic> data) {
@@ -46,6 +50,8 @@ class PrescriptionRequest {
       status: status,
       timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
       doctorName: data['doctorName'] as String? ?? '',
+      pdfData: data['pdfData'] as String?,
+      barcodeData: data['barcodeData'] as String?,
     );
   }
 
@@ -58,6 +64,8 @@ class PrescriptionRequest {
       'status': status.toString().split('.').last,
       'timestamp': Timestamp.fromDate(timestamp),
       'doctorName': doctorName,
+      'pdfData': pdfData,
+      'barcodeData': barcodeData,
     };
   }
 }

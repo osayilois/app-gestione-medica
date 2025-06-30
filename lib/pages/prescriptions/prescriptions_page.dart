@@ -8,6 +8,7 @@ import 'package:medicare_app/services/prescription_service.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:medicare_app/widgets/prescription_detail_dialog.dart';
 
 class PrescriptionsPage extends StatefulWidget {
   const PrescriptionsPage({Key? key}) : super(key: key);
@@ -326,7 +327,7 @@ class PrescriptionRequestCard extends StatelessWidget {
                 if (request.status == PrescriptionStatus.approved)
                   ElevatedButton(
                     onPressed: () {
-                      // Mostra dialog di mockup: grafica aperta prescrizione
+                      /* // Mostra dialog di mockup: grafica aperta prescrizione
                       showDialog(
                         context: context,
                         builder:
@@ -402,6 +403,13 @@ class PrescriptionRequestCard extends StatelessWidget {
                                 ),
                               ],
                             ),
+                      ); */
+
+                      // QUI VERRA MESSO IL METODO CHE VISUALIZZA IL BARCODE + PDF
+                      showDialog(
+                        context: context,
+                        builder:
+                            (_) => PrescriptionDetailDialog(request: request),
                       );
                     },
                     style: ElevatedButton.styleFrom(
