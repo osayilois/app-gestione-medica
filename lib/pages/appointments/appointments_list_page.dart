@@ -4,63 +4,280 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 
-class AppointmentsListPage extends StatelessWidget {
-  const AppointmentsListPage({super.key});
+/// Mostra gli appuntamenti divisi per stato con grafica in linea alle prescrizioni
+class AppointmentsListPage extends StatefulWidget {
+  const AppointmentsListPage({Key? key}) : super(key: key);
+
+  @override
+  State<AppointmentsListPage> createState() => _AppointmentsListPageState();
+}
+
+enum AppointmentStatus { upcoming, completed, cancelled }
+
+class _AppointmentsListPageState extends State<AppointmentsListPage> {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  AppointmentStatus _currentStatus = AppointmentStatus.upcoming;
+
+  Stream<QuerySnapshot> get _stream =>
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('appointments')
+          .orderBy('startTime', descending: true)
+          .snapshots();
 
   @override
   Widget build(BuildContext context) {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
-    final coll = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('appointments')
-        .orderBy('startTime', descending: true);
-
     return Scaffold(
-      // UN SOLO TITLO: “Your appointments”
-      /*appBar: AppBar(
-        title: const Text('Your appointments'),
-        backgroundColor: Colors.deepPurple[300],
-      ),*/
       backgroundColor: Colors.white,
-      body: StreamBuilder<QuerySnapshot>(
-        stream: coll.snapshots(),
-        builder: (context, snap) {
-          if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final docs = snap.data?.docs ?? [];
-          if (docs.isEmpty) {
-            return Center(
-              child: Text(
-                'Nessun appuntamento prenotato.',
-                style: AppTextStyles.body(color: Colors.black),
+      body: Column(
+        children: [
+          // Toggle stile prescriptions page
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(30),
               ),
-            );
-          }
-          return ListView.builder(
-            itemCount: docs.length,
-            itemBuilder: (context, i) {
-              final data = docs[i].data()! as Map<String, dynamic>;
-              final start = DateTime.parse(data['startTime']);
-              final end = DateTime.parse(data['endTime']);
-              return ListTile(
-                leading: const Icon(Icons.event_note, color: Colors.deepPurple),
-                title: Text(data['doctorName'] ?? '—'),
-                subtitle: Text(
-                  '${DateFormat('dd/MM/yyyy HH:mm').format(start)}'
-                  ' – ${DateFormat('HH:mm').format(end)}',
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () {
-                    docs[i].reference.delete();
+              child: Row(
+                children: List.generate(AppointmentStatus.values.length, (i) {
+                  final status = AppointmentStatus.values[i];
+                  final isSel = status == _currentStatus;
+                  final labels = ['Upcoming', 'Completed', 'Cancelled'];
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _currentStatus = status),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          color:
+                              isSel
+                                  ? Colors.deepPurple[300]
+                                  : Colors.transparent,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Center(
+                          child: Text(
+                            labels[i],
+                            style: AppTextStyles.body(
+                              color: isSel ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _stream,
+              builder: (context, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final docs = snap.data?.docs ?? [];
+                final now = DateTime.now();
+                final items =
+                    docs.where((d) {
+                      final data = d.data() as Map<String, dynamic>;
+                      final start = DateTime.parse(data['startTime']);
+                      final cancelled = data['status'] == 'cancelled';
+                      switch (_currentStatus) {
+                        case AppointmentStatus.upcoming:
+                          return !cancelled && start.isAfter(now);
+                        case AppointmentStatus.completed:
+                          return !cancelled && start.isBefore(now);
+                        case AppointmentStatus.cancelled:
+                          return cancelled;
+                      }
+                    }).toList();
+                if (items.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No appointments',
+                      style: AppTextStyles.body(color: Colors.black),
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  itemCount: items.length,
+                  itemBuilder: (ctx, i) {
+                    final doc = items[i];
+                    final data = doc.data() as Map<String, dynamic>;
+                    final start = DateTime.parse(data['startTime']);
+                    final doctor = data['doctorName'] as String? ?? '—';
+                    final img = data['doctorImage'] as String?;
+                    final isUpcoming =
+                        _currentStatus == AppointmentStatus.upcoming;
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                if (img != null)
+                                  CircleAvatar(
+                                    backgroundImage: AssetImage(img),
+                                    radius: 24,
+                                  ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        doctor,
+                                        style: AppTextStyles.title2(
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        data['doctorSpecialty'] as String? ??
+                                            '',
+                                        style: AppTextStyles.body(
+                                          color: Colors.grey[700]!,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.calendar_today,
+                                  size: 16,
+                                  color: Colors.grey[700],
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  DateFormat('dd/MM/yyyy').format(start),
+                                  style: AppTextStyles.body(
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Icon(
+                                  Icons.access_time,
+                                  size: 16,
+                                  color: Colors.grey[700],
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  DateFormat('HH:mm').format(start),
+                                  style: AppTextStyles.body(
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        isUpcoming
+                                            ? Colors.orange
+                                            : (_currentStatus ==
+                                                    AppointmentStatus.completed
+                                                ? Colors.green
+                                                : Colors.red),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  {
+                                    AppointmentStatus.upcoming: 'Upcoming',
+                                    AppointmentStatus.completed: 'Completed',
+                                    AppointmentStatus.cancelled: 'Cancelled',
+                                  }[_currentStatus]!,
+                                  style: AppTextStyles.body(
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (isUpcoming) ...[
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: () {},
+                                      style: OutlinedButton.styleFrom(
+                                        side: BorderSide(
+                                          color: Colors.grey.shade200,
+                                        ),
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Cancel',
+                                        style: AppTextStyles.buttons(
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            Colors.deepPurple.shade300,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Reschedule',
+                                        style: AppTextStyles.buttons(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
                   },
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
