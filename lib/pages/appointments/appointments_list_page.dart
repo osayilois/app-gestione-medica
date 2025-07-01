@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:medicare_app/theme/text_styles.dart';
+import 'package:medicare_app/pages/appointments/appointment_page.dart';
 
 /// Mostra gli appuntamenti divisi per stato con grafica in linea alle prescrizioni
 class AppointmentsListPage extends StatefulWidget {
@@ -32,7 +33,6 @@ class _AppointmentsListPageState extends State<AppointmentsListPage> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Toggle stile prescriptions page
           Padding(
             padding: const EdgeInsets.all(16),
             child: Container(
@@ -224,7 +224,65 @@ class _AppointmentsListPageState extends State<AppointmentsListPage> {
                                 children: [
                                   Expanded(
                                     child: OutlinedButton(
-                                      onPressed: () {},
+                                      onPressed: () async {
+                                        final confirm = await showDialog<bool>(
+                                          context: context,
+                                          builder:
+                                              (ctx) => AlertDialog(
+                                                title: Text(
+                                                  'Confirm Cancellation',
+                                                  style: AppTextStyles.title2(
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                content: Text(
+                                                  'Are you sure you want to cancel this appointment?',
+                                                  style: AppTextStyles.body(
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed:
+                                                        () => Navigator.pop(
+                                                          ctx,
+                                                          false,
+                                                        ),
+                                                    child: Text(
+                                                      'No',
+                                                      style:
+                                                          AppTextStyles.buttons(
+                                                            color:
+                                                                Colors
+                                                                    .deepPurple,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed:
+                                                        () => Navigator.pop(
+                                                          ctx,
+                                                          true,
+                                                        ),
+                                                    child: Text(
+                                                      "Yes, I'm sure",
+                                                      style:
+                                                          AppTextStyles.buttons(
+                                                            color:
+                                                                Colors
+                                                                    .deepPurple,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                        );
+                                        if (confirm == true) {
+                                          await doc.reference.update({
+                                            'status': 'cancelled',
+                                          });
+                                        }
+                                      },
                                       style: OutlinedButton.styleFrom(
                                         side: BorderSide(
                                           color: Colors.grey.shade200,
@@ -247,7 +305,23 @@ class _AppointmentsListPageState extends State<AppointmentsListPage> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (_) => AppointmentPage(
+                                                  doctorName:
+                                                      data['doctorName'],
+                                                  doctorSpecialty:
+                                                      data['doctorSpecialty'],
+                                                  doctorImagePath:
+                                                      data['doctorImage'],
+                                                  appointmentId: doc.id,
+                                                ),
+                                          ),
+                                        );
+                                      },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
                                             Colors.deepPurple.shade300,
