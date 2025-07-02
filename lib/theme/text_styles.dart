@@ -64,6 +64,15 @@ class AppTextStyles {
     ),
   );
 
+  // font per link e/o corpo 2
+  static TextStyle link1({Color color = Colors.black}) => GoogleFonts.outfit(
+    textStyle: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: color,
+    ),
+  );
+
   // font per bottoni (poppins)
   static TextStyle buttons({Color color = Colors.black}) => GoogleFonts.poppins(
     textStyle: TextStyle(

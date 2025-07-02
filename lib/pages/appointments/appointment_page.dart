@@ -27,10 +27,70 @@ class _AppointmentPageState extends State<AppointmentPage> {
   final List<Appointment> _appointments = [];
 
   Future<void> _bookAppointment(DateTime date) async {
+    /* final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    ); */
+
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+      builder: (BuildContext context, Widget? child) {
+        final base = Theme.of(context);
+        return Theme(
+          data: base.copyWith(
+            colorScheme: ColorScheme.light(
+              primary:
+                  Colors.deepPurple.shade300, // header e selezione lancetta
+              onPrimary: Colors.white, // testo ore/minuti quando selezionati
+              onSurface: Colors.deepPurple.shade300,
+            ),
+
+            timePickerTheme: TimePickerThemeData(
+              // 1) Numeri grandi (ore/minuti) BIANCHI, thick, regolando height per riallineare i “:”
+              hourMinuteTextStyle: AppTextStyles.title1(
+                color: Colors.white,
+              ).copyWith(
+                fontWeight: FontWeight.w700,
+                height: 2.8, // <1 = sale, >1 = scende. Gioca con questo valore
+                textBaseline: TextBaseline.alphabetic,
+              ),
+              // 2) Sfondo del quadrante (dietro lancetta)
+              dialBackgroundColor: Colors.grey.shade200,
+              // 3) Numeri del quadrante (dial) NERI, font buttons
+              dialTextStyle: AppTextStyles.buttons(
+                color: Colors.black,
+              ).copyWith(fontWeight: FontWeight.w600),
+              // 4) Label “Select time” e “AM/PM” in body
+              helpTextStyle: AppTextStyles.body(color: Colors.black87),
+              dayPeriodTextStyle: AppTextStyles.body(color: Colors.black87),
+              // 5) Dialog arrotondato
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              // 6) Icone entry mode (tastierina/freccia) in nero
+              entryModeIconColor: Colors.black,
+            ),
+
+            // Campi di input (modalità tastierina): label “Hour”/“Minute” in body
+            inputDecorationTheme: InputDecorationTheme(
+              labelStyle: AppTextStyles.body(color: Colors.black87),
+              hintStyle: AppTextStyles.body(color: Colors.black54),
+            ),
+
+            // Bottoni CANCEL/OK
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.deepPurple.shade300,
+                textStyle: AppTextStyles.buttons(color: Colors.black),
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
+
     if (pickedTime == null) return;
 
     final start = DateTime(
@@ -94,20 +154,83 @@ class _AppointmentPageState extends State<AppointmentPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Appointment with ${widget.doctorName}'),
+        title: Text(
+          'Appointment with ${widget.doctorName}',
+          style: AppTextStyles.link1(color: Colors.black),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.grey[800]!),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SfCalendar(
+
+        /* child: SfCalendar(
           view: CalendarView.month,
           dataSource: AppointmentDataSource(_appointments),
-          monthViewSettings: const MonthViewSettings(
+          backgroundColor: Colors.white,
+          todayHighlightColor: Colors.deepPurple.shade300,
+          selectionDecoration: BoxDecoration(
+            color: Colors.deepPurple.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.deepPurple),
+          ),
+          headerStyle: CalendarHeaderStyle(
+            textAlign: TextAlign.center,
+            textStyle: AppTextStyles.title2(color: Colors.deepPurple),
+          ),
+          viewHeaderStyle: ViewHeaderStyle(
+            dayTextStyle: AppTextStyles.body(color: Colors.black),
+            dateTextStyle: AppTextStyles.body(color: Colors.grey[700]!),
+          ),
+          monthViewSettings: MonthViewSettings(
             showAgenda: true,
+            agendaStyle: AgendaStyle(
+              appointmentTextStyle: AppTextStyles.body(color: Colors.black),
+              dateTextStyle: AppTextStyles.body(color: Colors.deepPurple),
+              dayTextStyle: AppTextStyles.link1(color: Colors.black),
+            ),
+
             appointmentDisplayMode: MonthAppointmentDisplayMode.indicator,
           ),
+          onTap: (details) {
+            if (details.targetElement == CalendarElement.calendarCell &&
+                details.date != null) {
+              _bookAppointment(details.date!);
+            }
+          },
+        ), */
+        child: SfCalendar(
+          view: CalendarView.month,
+          headerHeight: 60,
+          headerStyle: CalendarHeaderStyle(
+            textStyle: AppTextStyles.title1(color: Colors.deepPurple),
+            textAlign: TextAlign.center,
+          ),
+          viewHeaderStyle: ViewHeaderStyle(
+            dayTextStyle: AppTextStyles.buttons(color: Colors.black),
+            dateTextStyle: AppTextStyles.body(color: Colors.grey.shade700),
+          ),
+          monthViewSettings: MonthViewSettings(
+            showAgenda: true,
+            monthCellStyle: MonthCellStyle(
+              textStyle: AppTextStyles.body(),
+              leadingDatesTextStyle: AppTextStyles.link(color: Colors.grey),
+              trailingDatesTextStyle: AppTextStyles.body(color: Colors.grey),
+            ),
+            agendaStyle: AgendaStyle(
+              dayTextStyle: AppTextStyles.link(color: Colors.black),
+              dateTextStyle: AppTextStyles.body(),
+              appointmentTextStyle: AppTextStyles.body(
+                color: Colors.deepPurple,
+              ),
+            ),
+          ),
+          selectionDecoration: BoxDecoration(
+            color: Colors.deepPurple.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          showNavigationArrow: true,
           onTap: (details) {
             if (details.targetElement == CalendarElement.calendarCell &&
                 details.date != null) {
