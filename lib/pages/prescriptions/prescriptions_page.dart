@@ -34,7 +34,7 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
       appBar: AppBar(
         title: Text(
           _showForm ? 'New Prescription Request' : 'Your Prescription Requests',
-          style: AppTextStyles.buttons(color: Colors.grey[800]!),
+          style: AppTextStyles.title2(color: Colors.grey[800]!),
         ),
         backgroundColor: Colors.white,
         elevation: 0,

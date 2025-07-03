@@ -14,7 +14,7 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Placeholder: mostra semplicemente il saluto
+    // Placeholder: mostra il saluto
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: Row(
