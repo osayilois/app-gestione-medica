@@ -1,5 +1,3 @@
-// lib/widgets/profile_overview_bottom_sheet.dart
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,6 +15,7 @@ class ProfileOverviewBottomSheet extends StatefulWidget {
 
 class _ProfileOverviewBottomSheetState
     extends State<ProfileOverviewBottomSheet> {
+  Map<String, dynamic>? userData;
   Map<String, dynamic>? medicalCard;
   bool isLoading = true;
 
@@ -29,16 +28,14 @@ class _ProfileOverviewBottomSheetState
   Future<void> _loadData() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
-
     final doc =
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    final mc = doc.data()?['medicalCard'] as Map<String, dynamic>?;
-    if (mounted) {
-      setState(() {
-        medicalCard = mc;
-        isLoading = false;
-      });
-    }
+    final data = doc.data() ?? {};
+    setState(() {
+      userData = data;
+      medicalCard = data['medicalCard'] as Map<String, dynamic>?;
+      isLoading = false;
+    });
   }
 
   Widget _infoTile(String label, String? value) {
@@ -84,6 +81,19 @@ class _ProfileOverviewBottomSheetState
                     Text('Patient Overview', style: AppTextStyles.title1()),
                     const SizedBox(height: 24),
 
+                    // Anagrafica
+                    _infoTile(
+                      'Full Name',
+                      userData?['fullName'] ??
+                          FirebaseAuth.instance.currentUser?.displayName ??
+                          FirebaseAuth.instance.currentUser?.email,
+                    ),
+                    _infoTile('Tax Code', userData?['fiscalCode']),
+                    _infoTile('Phone', userData?['phone']),
+                    _infoTile('Residence', userData?['residence']),
+                    const Divider(),
+
+                    // Medical Card
                     _infoTile(
                       'Date of Birth',
                       medicalCard?['birthDate'] != null

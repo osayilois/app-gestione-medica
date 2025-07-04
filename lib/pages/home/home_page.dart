@@ -48,11 +48,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  static const List<Widget> _pages = <Widget>[
+  static final List<Widget> _pages = <Widget>[
     HomeContent(),
     AppointmentsListPage(),
     PrescriptionsPage(),
-    ProfilePage(),
+    ProfilePage(), // ora riconosciuto correttamente
   ];
 
   void _onTap(int idx) {
