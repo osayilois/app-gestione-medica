@@ -43,6 +43,7 @@ lib/
 │   ├── prescription_detail_dialogue.dart
 │   ├── top_rated_doctors_section.dart
 │   ├── logout_dialog.dart
+│   ├── chat_box.dart
 │   └── avatar_picker_bottom_sheet   # Altri widget riutilizzabili
 │
 ├── pages/
