@@ -17,6 +17,7 @@ samples, guidance on mobile development, and a full API reference.
 
 ## 📁 Directory structure
 
+```plaintext
 lib/
 │
 ├── main.dart                        # Entry point
@@ -79,3 +80,5 @@ lib/
 │   │   ├── doctor_detail_page.dart
 │   │   ├── doctor_profile_page.dart
 │   │   └── specialist_page.dart
+
+```
