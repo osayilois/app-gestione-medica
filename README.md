@@ -17,10 +17,9 @@ samples, guidance on mobile development, and a full API reference.
 
 ## 📁 Directory structure
 
-```plaintext
 lib/
 │
-├── main.dart                         # Entry point
+├── main.dart                        # Entry point
 │
 ├── theme/
 │   └── text_styles.dart             # Font, colori, stili testo
@@ -28,6 +27,7 @@ lib/
 ├── util/
 │   ├── doctor_card.dart             # Widget riutilizzabili
 │   └── category_card.dart
+│
 │
 ├── services/
 │   ├── auth_service.dart            # Login/Logout/Firebase auth
@@ -39,8 +39,10 @@ lib/
 │   ├── home_header.dart
 │   ├── medical_banner.dart          # Banner per Homepage
 │   ├── specialists_section.dart
+│   ├── prescription_detail_dialogue.dart
+│   ├── top_rated_doctors_section.dart
 │   ├── logout_dialog.dart
-│   └── ...                          # Altri widget riutilizzabili
+│   └── avatar_picker_bottom_sheet   # Altri widget riutilizzabili
 │
 ├── pages/
 │   ├── home/
@@ -51,6 +53,7 @@ lib/
 │   │   ├── register_page.dart
 │   │   └── forgot_password_page.dart # Da inserire
 │   │ 
+│   │    
 │   ├── data/
 │   │   ├── mock_doctors.dart
 │   │   └── specialty_categories.dart
@@ -65,14 +68,14 @@ lib/
 │   │
 │   ├── profile/
 │   │   ├── medical_card_page.dart
+│   │   ├── profile_overview_bottom_sheet.dart      #panormica profilo utente
 │   │   └── profile_page.dart
 │   │
 │   ├── admin/
 │   │   ├── admin_home_page.dart
 │   │   └── admin_prescription_page.dart
-│   │
+│   │   
 │   └── doctor/
-│       ├── doctor_detail_page.dart
-│       ├── doctor_profile_page.dart
-│       └── specialist_page.dart
-```
+│   │   ├── doctor_detail_page.dart
+│   │   ├── doctor_profile_page.dart
+│   │   └── specialist_page.dart
