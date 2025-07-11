@@ -47,24 +47,36 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  int _unreadCount = 0;
 
   static final List<Widget> _pages = <Widget>[
     HomeContent(),
     AppointmentsListPage(),
     PrescriptionsPage(),
-    ProfilePage(), // ora riconosciuto correttamente
+    ProfilePage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('notifications')
+          .where('read', isEqualTo: false)
+          .snapshots()
+          .listen((snap) {
+            setState(() {
+              _unreadCount = snap.docs.length;
+            });
+          });
+    }
+  }
 
   void _onTap(int idx) {
     setState(() => _currentIndex = idx);
-  }
-
-  Future<void> _confirmLogout() async {
-    final should = await showDialog<bool>(
-      context: context,
-      builder: (_) => const LogoutDialog(),
-    );
-    if (should == true) await FirebaseAuth.instance.signOut();
   }
 
   @override
@@ -76,10 +88,9 @@ class _MainScreenState extends State<MainScreen> {
       FontAwesomeIcons.briefcaseMedical,
       FontAwesomeIcons.userLarge,
     ];
+
     return Scaffold(
       backgroundColor: Colors.white,
-      // Conditionally hide AppBar on Profile page
-      // Mostra l'AppBar globale solo sulla Home (idx 0)
       appBar:
           _currentIndex == 0
               ? AppBar(
@@ -91,9 +102,42 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 centerTitle: true,
                 actions: [
-                  IconButton(
-                    icon: const Icon(Icons.logout, color: Colors.grey),
-                    onPressed: _confirmLogout,
+                  Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.notifications_none,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/notifications');
+                        },
+                      ),
+                      if (_unreadCount > 0)
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 20,
+                              minHeight: 20,
+                            ),
+                            child: Text(
+                              '$_unreadCount',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               )
