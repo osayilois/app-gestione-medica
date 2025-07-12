@@ -13,11 +13,11 @@ import 'package:medicare_app/pages/prescriptions/prescriptions_page.dart';
 import 'package:medicare_app/pages/profile/medical_card_page.dart';
 import 'package:medicare_app/widgets/home_header.dart';
 import 'package:medicare_app/widgets/medical_banner.dart';
-import 'package:medicare_app/widgets/search_bar.dart';
 import 'package:medicare_app/widgets/specialists_section.dart';
 import 'package:medicare_app/pages/home/notifications_page.dart';
 import 'package:medicare_app/data/mock_doctors.dart';
 import 'package:medicare_app/data/specialty_categories.dart';
+import 'package:medicare_app/widgets/upcoming_appointments_widget.dart';
 import 'package:medicare_app/widgets/top_rated_doctors_section.dart';
 
 class HomePage extends StatelessWidget {
@@ -84,6 +84,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     const labels = ['Home', 'Appointments', 'Prescriptions', 'Profile'];
+
     const icons = [
       FontAwesomeIcons.house,
       FontAwesomeIcons.calendarDays,
@@ -150,10 +151,12 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex: _currentIndex,
         onTap: _onTap,
         type: BottomNavigationBarType.fixed,
-        showUnselectedLabels: false,
+        showUnselectedLabels: true,
         showSelectedLabels: true,
         selectedItemColor: Colors.deepPurple[300],
         unselectedItemColor: Colors.grey[500],
+        selectedLabelStyle: AppTextStyles.link(color: Colors.deepPurple[300]!),
+        unselectedLabelStyle: AppTextStyles.link(color: Colors.grey[500]!),
         items: List.generate(
           4,
           (i) =>
@@ -273,7 +276,7 @@ class _HomeContentState extends State<HomeContent> {
               ),
               const SizedBox(height: 25),
 
-              // 4) Risultati ricerca o vista standard
+              // 5) Risultati ricerca o vista standard
               if (query.isNotEmpty) ...[
                 ListView.builder(
                   shrinkWrap: true,
@@ -305,6 +308,10 @@ class _HomeContentState extends State<HomeContent> {
                   },
                 ),
               ] else ...[
+                // Widget appuntamenti futuri
+                const UpcomingAppointmentsWidget(),
+                const SizedBox(height: 25),
+
                 SpecialistsSection(
                   categories: specialtyCategories,
                   doctors: mockDoctors,
