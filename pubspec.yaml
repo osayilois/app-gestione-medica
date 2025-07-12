@@ -93,6 +93,8 @@ flutter:
    - lib/icons/
    - assets/animations/
    - assets/avatar/
+   - assets/illustrations/
+   - assets/medicare_logo.png
   
 
   # An image asset can refer to one or more resolution-specific "variants", see

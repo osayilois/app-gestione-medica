@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 import 'package:medicare_app/util/doctor_card.dart';
-import 'package:medicare_app/pages/doctor/doctor_profile_page.dart'; // importa la pagina profilo
+import 'package:medicare_app/pages/doctor/doctor_profile_page.dart';
 
 class TopRatedDoctorsSection extends StatelessWidget {
   /// Lista di medici: ogni mappa deve contenere almeno 'rating', 'name', 'specialty', 'image'

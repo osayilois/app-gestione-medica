@@ -1,4 +1,4 @@
-// HOME
+// HOMEPAGE
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,6 +19,7 @@ import 'package:medicare_app/data/mock_doctors.dart';
 import 'package:medicare_app/data/specialty_categories.dart';
 import 'package:medicare_app/widgets/upcoming_appointments_widget.dart';
 import 'package:medicare_app/widgets/top_rated_doctors_section.dart';
+import 'package:medicare_app/widgets/health_articles_carousel.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -331,6 +332,11 @@ class _HomeContentState extends State<HomeContent> {
                   },
                 ),
                 const SizedBox(height: 25),
+
+                // articoli medici
+                HealthArticlesCarousel(),
+                const SizedBox(height: 25),
+
                 TopRatedDoctorsSection(doctors: mockDoctors, threshold: 4.8),
                 const SizedBox(height: 25),
               ],

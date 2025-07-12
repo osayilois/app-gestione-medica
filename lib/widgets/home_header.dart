@@ -30,7 +30,6 @@ class HomeHeader extends StatelessWidget {
               const SizedBox(height: 8),
             ],
           ),
-          // eventualmente un avatar o altro, qui omesso
         ],
       ),
     );

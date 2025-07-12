@@ -103,9 +103,12 @@ class _UpcomingAppointmentsWidgetState
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Card(
+                      color: Colors.teal.shade100,
+                      elevation: 2,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
+                      margin: const EdgeInsets.symmetric(vertical: 4),
                       child: ListTile(
                         contentPadding: const EdgeInsets.all(12),
                         leading: CircleAvatar(

@@ -26,8 +26,9 @@ lib/
 │   └── text_styles.dart             # Font, colori, stili testo
 │
 ├── util/
-│   ├── doctor_card.dart             # Widget riutilizzabili
-│   └── category_card.dart
+│   ├── article_item_card.dart             # Widget riutilizzabili
+│   ├── category_card.dart  
+│   └── doctor_card.dart
 │
 │
 ├── services/
@@ -42,23 +43,30 @@ lib/
 │   ├── specialists_section.dart
 │   ├── prescription_detail_dialogue.dart
 │   ├── top_rated_doctors_section.dart
-│   ├── logout_dialog.dart
 │   ├── chat_box.dart
-│   └── avatar_picker_bottom_sheet   # Altri widget riutilizzabili
+│   ├── avatar_picker_bottom_sheet.dart
+│   ├── health_articles_carousel.dart
+│   └── upcoming_appointments_widget
 │
 ├── pages/
 │   ├── home/
-│   │   └── home_page.dart           # Contiene anche HomeContent
+│   │   ├── home_page.dart     # contiene anche HomeContent
+│   │   └── notifications_page.dart 
+│   │  
 │   │
 │   ├── auth/
 │   │   ├── login_page.dart
 │   │   ├── register_page.dart
-│   │   └── forgot_password_page.dart # Da inserire
+│   │   └── forgot_password_page.dart 
 │   │ 
 │   │    
 │   ├── data/
 │   │   ├── mock_doctors.dart
 │   │   └── specialty_categories.dart
+│   │
+│   ├── articles/
+│   │   ├── article_detail_page.dart
+│   │   └── articles_page.dart
 │   │
 │   ├── appointments/
 │   │   ├── appointment_page.dart

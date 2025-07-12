@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:medicare_app/pages/home/home_page.dart';
 import 'package:medicare_app/pages/auth/register_page.dart';
 import 'package:medicare_app/theme/text_styles.dart';
-import 'package:medicare_app/pages/admin/admin_home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,46 +15,6 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool isLoading = false;
-
-  /* void signIn() async {
-    setState(() => isLoading = true);
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    } on FirebaseAuthException catch (e) {
-      showDialog(
-        context: context,
-        builder:
-            (context) => AlertDialog(
-              title: Text(
-                'Login Failed',
-                style: AppTextStyles.subtitle(color: Colors.black),
-              ),
-              content: Text(
-                e.message ?? 'Unknown error',
-                style: AppTextStyles.body(color: Colors.black),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    'OK',
-                    style: AppTextStyles.buttons(color: Colors.deepPurple),
-                  ),
-                ),
-              ],
-            ),
-      );
-    }
-    setState(() => isLoading = false);
-  } */
 
   void signIn() async {
     setState(() => isLoading = true);
@@ -238,6 +197,15 @@ class _LoginPageState extends State<LoginPage> {
                   },
                   child: Text(
                     "Don't have an account? Register here",
+                    style: AppTextStyles.link(color: Colors.deepPurple),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/forgot-password');
+                  },
+                  child: Text(
+                    'Forgot password? Click here',
                     style: AppTextStyles.link(color: Colors.deepPurple),
                   ),
                 ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:medicare_app/pages/profile/medical_card_page.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 
 class MedicalBanner extends StatelessWidget {
@@ -83,7 +82,7 @@ class MedicalBanner extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              "Let's find your \nDoctor",
+              "Let's Find Your \nDoctor",
               style: AppTextStyles.bigtitle(color: Colors.black),
               textAlign: TextAlign.left,
             ),
