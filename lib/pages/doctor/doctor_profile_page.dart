@@ -510,6 +510,7 @@ import 'package:medicare_app/theme/text_styles.dart';
 import 'package:medicare_app/pages/appointments/appointment_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:medicare_app/widgets/chat_box.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 enum InfoType { phone, email, address, hours }
 
@@ -644,7 +645,8 @@ class DoctorProfilePage extends StatelessWidget {
                     radius: 24,
                     backgroundColor: Colors.grey.shade300,
                     child: Icon(
-                      Icons.chat_bubble_outline,
+                      //Icons.chat_bubble_outline,
+                      FontAwesomeIcons.comment,
                       color: Colors.grey.shade700,
                     ),
                   ),

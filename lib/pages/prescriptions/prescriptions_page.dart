@@ -527,11 +527,13 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _nameController,
+              style: AppTextStyles.subtitle(color: Colors.black),
               decoration: InputDecoration(
                 labelText:
                     _type == PrescriptionType.medicine
                         ? 'Medication Name'
                         : 'Type of visit request',
+                labelStyle: AppTextStyles.body(color: Colors.grey.shade600),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -543,8 +545,10 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _descController,
+              style: AppTextStyles.subtitle(color: Colors.black),
               decoration: InputDecoration(
                 labelText: 'Add note (optional)',
+                labelStyle: AppTextStyles.body(color: Colors.grey.shade600),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -592,7 +596,7 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
         SnackBar(
           content: Text(
             'Medical practitioner not updated',
-            style: AppTextStyles.body(color: Colors.black),
+            style: AppTextStyles.body(color: Colors.white),
           ),
         ),
       );

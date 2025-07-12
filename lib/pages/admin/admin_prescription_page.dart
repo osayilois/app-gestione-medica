@@ -118,6 +118,15 @@ class _AdminPrescriptionPageState extends State<AdminPrescriptionPage> {
                                       .approveRequestAndGenerateBarcode(
                                         requestId: requestId,
                                       );
+
+                                  // manda notifica in-app
+                                  await _sendInAppNotification(
+                                    patientId: patientId,
+                                    title: 'Prescription Approved',
+                                    body:
+                                        'Your request for "$name" has been approved.',
+                                  );
+
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
@@ -150,6 +159,14 @@ class _AdminPrescriptionPageState extends State<AdminPrescriptionPage> {
                                 await _service.declineRequest(
                                   requestId: requestId,
                                 );
+
+                                await _sendInAppNotification(
+                                  patientId: patientId,
+                                  title: 'Prescription Declined',
+                                  body:
+                                      'Unfortunately, your request for "$name" has been declined.',
+                                );
+
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Request declined'),
@@ -178,4 +195,21 @@ class _AdminPrescriptionPageState extends State<AdminPrescriptionPage> {
       ),
     );
   }
+}
+
+Future<void> _sendInAppNotification({
+  required String patientId,
+  required String title,
+  required String body,
+}) async {
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(patientId)
+      .collection('notifications')
+      .add({
+        'title': title,
+        'body': body,
+        'read': false,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 }

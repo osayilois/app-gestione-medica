@@ -1,3 +1,5 @@
+// SPECIALIST SECTION
+
 // lib/widgets/specialists_section.dart
 import 'package:flutter/material.dart';
 import 'package:medicare_app/util/category_card.dart';

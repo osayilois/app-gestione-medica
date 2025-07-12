@@ -1,3 +1,5 @@
+// search bar
+
 // lib/widgets/search_bar.dart
 import 'package:flutter/material.dart';
 import 'package:medicare_app/theme/text_styles.dart';

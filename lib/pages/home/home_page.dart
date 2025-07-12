@@ -1,3 +1,5 @@
+// HOME
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,7 +15,7 @@ import 'package:medicare_app/widgets/home_header.dart';
 import 'package:medicare_app/widgets/medical_banner.dart';
 import 'package:medicare_app/widgets/search_bar.dart';
 import 'package:medicare_app/widgets/specialists_section.dart';
-import 'package:medicare_app/widgets/logout_dialog.dart';
+import 'package:medicare_app/pages/home/notifications_page.dart';
 import 'package:medicare_app/data/mock_doctors.dart';
 import 'package:medicare_app/data/specialty_categories.dart';
 import 'package:medicare_app/widgets/top_rated_doctors_section.dart';
@@ -67,9 +69,9 @@ class _MainScreenState extends State<MainScreen> {
           .collection('notifications')
           .where('read', isEqualTo: false)
           .snapshots()
-          .listen((snap) {
+          .listen((snapshot) {
             setState(() {
-              _unreadCount = snap.docs.length;
+              _unreadCount = snapshot.docs.length;
             });
           });
     }
@@ -106,34 +108,35 @@ class _MainScreenState extends State<MainScreen> {
                     children: [
                       IconButton(
                         icon: const Icon(
-                          Icons.notifications_none,
+                          //Icons.notifications,
+                          FontAwesomeIcons.bell,
                           color: Colors.grey,
                         ),
                         onPressed: () {
-                          Navigator.pushNamed(context, '/notifications');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationsPage(),
+                            ),
+                          );
                         },
                       ),
                       if (_unreadCount > 0)
                         Positioned(
-                          right: 8,
-                          top: 8,
+                          right: 10,
+                          top: 10,
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
                               color: Colors.red,
                               shape: BoxShape.circle,
                             ),
-                            constraints: const BoxConstraints(
-                              minWidth: 20,
-                              minHeight: 20,
-                            ),
                             child: Text(
                               '$_unreadCount',
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 12,
+                                fontSize: 10,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           ),
                         ),
@@ -199,56 +202,131 @@ class _HomeContentState extends State<HomeContent> {
 
   @override
   Widget build(BuildContext context) {
+    final query = _searchController.text.trim().toLowerCase();
+    final filtered =
+        mockDoctors
+            .where((d) => d['name']!.toLowerCase().contains(query))
+            .toList();
+
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // 1) Header
               HomeHeader(
                 getGreeting: getGreeting,
                 getUserDisplayName: getUserDisplayName,
               ),
               const SizedBox(height: 25),
+
+              // 2) MedicalBanner
               MedicalBanner(
                 hasMedical: _hasMedical,
                 onGetStarted: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const MedicalCardPage()),
-                  ).then((_) {
-                    _checkMedicalCard();
-                  });
+                  ).then((_) => _checkMedicalCard());
                 },
               ),
               const SizedBox(height: 25),
-              DoctorSearchBar(
-                controller: _searchController,
-                onSearch: _filterDoctors,
-              ),
-              const SizedBox(height: 25),
-              SpecialistsSection(
-                categories: specialtyCategories,
-                doctors: mockDoctors,
-                selectedSpecialty: selectedSpecialty,
-                onCategoryTap: (name) {
-                  setState(() => selectedSpecialty = name);
-                  _filterDoctors(_searchController.text);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => SpecialistPage(
-                            specialty: name,
-                            doctors: mockDoctors,
+
+              // 3) Search field
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          style: AppTextStyles.subtitle(color: Colors.black),
+                          decoration: InputDecoration(
+                            hintText: 'Search doctors...',
+                            hintStyle: AppTextStyles.body(
+                              color: Colors.grey.shade600,
+                            ),
+                            border: InputBorder.none,
                           ),
-                    ),
-                  );
-                },
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                      if (_searchController.text.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.grey),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {});
+                          },
+                        ),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 25),
-              TopRatedDoctorsSection(doctors: mockDoctors, threshold: 4.8),
-              const SizedBox(height: 25),
+
+              // 4) Risultati ricerca o vista standard
+              if (query.isNotEmpty) ...[
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: filtered.length,
+                  itemBuilder: (_, i) {
+                    final doc = filtered[i];
+                    return ListTile(
+                      title: Text(
+                        doc['name']!,
+                        style: AppTextStyles.buttons(color: Colors.black),
+                      ),
+                      subtitle: Text(
+                        doc['specialty']!,
+                        style: AppTextStyles.body(color: Colors.black),
+                      ),
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => SpecialistPage(
+                                    specialty: doc['specialty']!,
+                                    doctors: mockDoctors,
+                                  ),
+                            ),
+                          ),
+                    );
+                  },
+                ),
+              ] else ...[
+                SpecialistsSection(
+                  categories: specialtyCategories,
+                  doctors: mockDoctors,
+                  selectedSpecialty: selectedSpecialty,
+                  onCategoryTap: (name) {
+                    setState(() => selectedSpecialty = name);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) => SpecialistPage(
+                              specialty: name,
+                              doctors: mockDoctors,
+                            ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 25),
+                TopRatedDoctorsSection(doctors: mockDoctors, threshold: 4.8),
+                const SizedBox(height: 25),
+              ],
             ],
           ),
         ),
