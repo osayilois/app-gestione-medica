@@ -1,5 +1,6 @@
 // lib/pages/doctor_profile_page.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:medicare_app/theme/text_styles.dart';
 import 'package:medicare_app/pages/appointments/appointment_page.dart';
@@ -89,9 +90,9 @@ class DoctorProfilePage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
             ],
-            if (address.isNotEmpty)
+            if (address.isNotEmpty) ...[
               Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: 8),
                 child: _infoRow(
                   Icons.location_on,
                   address,
@@ -99,6 +100,9 @@ class DoctorProfilePage extends StatelessWidget {
                   context: context,
                 ),
               ),
+              //const SizedBox(height: 16),
+            ],
+
             if (phone.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -206,7 +210,7 @@ class DoctorProfilePage extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () async {
-          Uri uri;
+          Uri? uri;
           try {
             switch (type) {
               case InfoType.phone:
@@ -220,24 +224,33 @@ class DoctorProfilePage extends StatelessWidget {
               case InfoType.address:
                 final encoded = Uri.encodeComponent(text.trim());
                 uri = Uri.parse(
-                  'https://www.google.com/maps/search/?api=1&query=$encoded',
+                  Platform.isIOS
+                      ? 'https://maps.apple.com/?q=$encoded'
+                      : 'https://www.google.com/maps/search/?api=1&query=$encoded',
                 );
                 break;
               case InfoType.hours:
-                return;
+                return; // Non fa nulla
             }
 
-            if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Non è possibile aprire: $text')),
+            if (uri != null) {
+              final launched = await launchUrl(
+                uri,
+                mode: LaunchMode.externalApplication,
               );
+              if (!launched) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Non è possibile aprire: $text')),
+                );
+              }
             }
-          } catch (_) {
+          } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Errore tentando di aprire: $text')),
             );
           }
         },
+
         borderRadius: BorderRadius.circular(4),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),

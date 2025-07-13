@@ -408,7 +408,7 @@ class _NewPrescriptionFormState extends State<NewPrescriptionForm> {
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
     final data = doc.data();
     setState(() {
-      _doctorName = data?['medicoBase'] as String? ?? '';
+      _doctorName = data?['medicalPractitioner'] as String? ?? '';
     });
   }
 

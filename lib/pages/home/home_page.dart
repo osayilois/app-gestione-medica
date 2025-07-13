@@ -179,6 +179,7 @@ class _HomeContentState extends State<HomeContent> {
   final TextEditingController _searchController = TextEditingController();
   String selectedSpecialty = 'All';
   bool _hasMedical = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -189,23 +190,26 @@ class _HomeContentState extends State<HomeContent> {
   Future<void> _checkMedicalCard() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+
     final doc =
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
             .get();
     final data = doc.data();
+
     setState(() {
       _hasMedical = data?['medicalCard'] != null;
+      _isLoading = false; // <--- caricato
     });
-  }
-
-  void _filterDoctors(String query) {
-    SpecialistsSection.of(context)?.filter(query);
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     final query = _searchController.text.trim().toLowerCase();
     final filtered =
         mockDoctors
@@ -219,14 +223,12 @@ class _HomeContentState extends State<HomeContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1) Header
               HomeHeader(
                 getGreeting: getGreeting,
                 getUserDisplayName: getUserDisplayName,
               ),
               const SizedBox(height: 25),
 
-              // 2) MedicalBanner
               MedicalBanner(
                 hasMedical: _hasMedical,
                 onGetStarted: () {

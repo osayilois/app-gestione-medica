@@ -126,9 +126,5 @@ flutter:
     - family:  CalSans
       fonts:
       - asset: assets/fonts/CalSans-SemiBold.ttf
-      #weight: 600
+  
 
-  # dependencies:
-  # flutter:
-  #   sdk: flutter
-  # google_fonts: ^6.1.0

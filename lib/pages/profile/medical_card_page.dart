@@ -21,6 +21,9 @@ class _MedicalCardPageState extends State<MedicalCardPage> {
   final _fiscalCodeController = TextEditingController();
   final _phoneController = TextEditingController();
   final _residenceController = TextEditingController();
+  final _medicalPractitionerController = TextEditingController();
+  final _heightController = TextEditingController();
+  final _weightController = TextEditingController();
   final _allergiesController = TextEditingController();
   final _conditionsController = TextEditingController();
   final _therapyController = TextEditingController();
@@ -42,12 +45,15 @@ class _MedicalCardPageState extends State<MedicalCardPage> {
     _fiscalCodeController.text = data['fiscalCode'] ?? '';
     _phoneController.text = data['phone'] ?? '';
     _residenceController.text = data['residence'] ?? '';
+    _medicalPractitionerController.text = data['medicalPractitioner'] ?? '';
     final mc = data['medicalCard'] as Map<String, dynamic>?;
     if (mc != null) {
       setState(() {
         _birth =
             mc['birthDate'] != null ? DateTime.parse(mc['birthDate']) : null;
         _bloodType = mc['bloodType'];
+        _heightController.text = mc['height']?.toString() ?? '';
+        _weightController.text = mc['weight']?.toString() ?? '';
         _allergiesController.text = mc['allergies'] ?? '';
         _conditionsController.text = mc['conditions'] ?? '';
         _therapyController.text = mc['therapy'] ?? '';
@@ -91,9 +97,12 @@ class _MedicalCardPageState extends State<MedicalCardPage> {
       'fiscalCode': _fiscalCodeController.text.trim(),
       'phone': _phoneController.text.trim(),
       'residence': _residenceController.text.trim(),
+      'medicalPractitioner': _medicalPractitionerController.text.trim(),
       'medicalCard': {
         'birthDate': _birth?.toIso8601String(),
         'bloodType': _bloodType,
+        'height': int.tryParse(_heightController.text.trim()),
+        'weight': int.tryParse(_weightController.text.trim()),
         'allergies': _allergiesController.text.trim(),
         'conditions': _conditionsController.text.trim(),
         'therapy': _therapyController.text.trim(),
@@ -122,6 +131,9 @@ class _MedicalCardPageState extends State<MedicalCardPage> {
     _fiscalCodeController.dispose();
     _phoneController.dispose();
     _residenceController.dispose();
+    _medicalPractitionerController.dispose();
+    _heightController.dispose();
+    _weightController.dispose();
     _allergiesController.dispose();
     _conditionsController.dispose();
     _therapyController.dispose();
@@ -169,8 +181,6 @@ class _MedicalCardPageState extends State<MedicalCardPage> {
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Anagrafica
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -215,13 +225,17 @@ class _MedicalCardPageState extends State<MedicalCardPage> {
                               validator:
                                   (v) => v!.trim().isEmpty ? 'Required' : null,
                             ),
+                            const SizedBox(height: 12),
+                            _buildTextField(
+                              label: 'Medical Practitioner',
+                              controller: _medicalPractitionerController,
+                              validator:
+                                  (v) => v!.trim().isEmpty ? 'Required' : null,
+                            ),
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 24),
-
-                      // Medical Card
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -250,6 +264,18 @@ class _MedicalCardPageState extends State<MedicalCardPage> {
                             _buildDropdown(),
                             const SizedBox(height: 16),
                             _buildTextField(
+                              label: 'Height (cm)',
+                              controller: _heightController,
+                              keyboard: TextInputType.number,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildTextField(
+                              label: 'Weight (kg)',
+                              controller: _weightController,
+                              keyboard: TextInputType.number,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildTextField(
                               label: 'Allergies',
                               controller: _allergiesController,
                             ),
@@ -266,7 +292,6 @@ class _MedicalCardPageState extends State<MedicalCardPage> {
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 32),
                       ElevatedButton(
                         onPressed: _isLoading ? null : _save,
