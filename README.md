@@ -1,4 +1,4 @@
-# medicare_app
+# MediCare
 
 A Flutter medical app for patients and GPs to manage appointments, prescriptions, and medical data — built with Firebase and a responsive, animated UI.
 
